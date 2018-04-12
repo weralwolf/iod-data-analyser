@@ -63,8 +63,8 @@ if __name__ == '__main__':
         filedata = local_preload(badfile, FileParser, NACSRow, badfile)
         uts = filedata.get('ut_of_day', transposed=True)[0]
         for idx in range(1, len(uts)):
-            if uts[idx] < uts[idx - 1]:  # Must be <=
+            if uts[idx] == uts[idx - 1]:  # Must be <=
                 bad_subclass.add(badfile)
-                print("\t[{}/{}] {} {} {}".format(idx + 1, len(uts), uts[idx - 1], '=' if uts[idx] == uts[idx - 1] else '>', uts[idx]))
-    print("Bad subclass. Jump: {}".format(len(bad_subclass)))
+                print("\t{}[{}/{}] {} {} {}".format('!' if idx + 1 != len(uts) else ' ', idx + 1, len(uts), uts[idx - 1], '=' if uts[idx] == uts[idx - 1] else '>', uts[idx]))
+    print("Bad subclass. Equality: {}".format(len(bad_subclass)))
 
