@@ -1,14 +1,10 @@
 from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
 from ionospheredata.parser import FileParser, NACSRow, WATSRow
-from ionospheredata.utils import local_preload
+from ionospheredata.utils import local_preload, list_datafiles
 
 from os.path import join, basename
 from fnmatch import fnmatch
 from os import listdir
-
-
-def list_datafiles(dirname):
-    return sorted([join(dirname, file) for file in listdir(dirname) if fnmatch(file, "*.asc") or fnmatch(file, "*.ASC")])
 
 
 def check_ut_monotone(filename, RowParser):

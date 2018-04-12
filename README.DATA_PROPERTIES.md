@@ -1,4 +1,5 @@
 # NACS
+## Bad files
  NACS data is consist of 4644 data files and 1111894 datapoints. Among them:
  1. 558 files' UT data is not montonically increasing;
  2. 476 of 558 files contains duplicated UT values at the bottom of file;
@@ -26,7 +27,29 @@ key: NACS
 ```
 List of all bad files at `README.NACS.BADFILES.txt`
 
+## Duplicates and intersections
+```
+key: NACS
+  4086: total number of good datafiles
+
+  a54a65cce790505e72e48a0341670e4ae48a89e1a02813a28ec1299c24f512fb
+    1981267T231820_0_DE2_NACS_1S_V01.ASC
+    1981267T231820_1_DE2_NACS_1S_V01.ASC
+
+  de077d1c22a3a31ea5db6e7f2cd671f32f2e3c1f19cd2730fe01e3dcbd3cdbfa
+    1981264T073640_0_DE2_NACS_1S_V01.ASC
+    1981264T073640_1_DE2_NACS_1S_V01.ASC
+  4084: total number of exclusive datafiles
+  0 iteration. Intersection search
+    24 files are intersecting
+  1 iteration. Intersection search
+    0 files are intersecting
+4060 files left after filtering
+7793701 datapoints left
+```
+
 # WATS
+## Bad files
 ```
 key: WATS
   Totals:
@@ -48,3 +71,18 @@ key: WATS
   0.0002295%: rate of losts with removing doppledangers
 ```
 List of all bad files at `README.WATS.BADFILES.txt`
+
+## Duplicates and intersections
+```
+key: WATS
+  448: total number of good datafiles
+  448: total number of exclusive datafiles
+  0 iteration. Intersection search
+    0 files are intersecting
+448 files left after filtering
+2476514 datapoints left
+
+Duplicated files:
+
+Intersected files:
+```
