@@ -2,7 +2,7 @@ from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
 from ionospheredata.parser import FileParser, NACSRow, WATSRow
 
 import pickle, hashlib
-from os.path import join, dirname, realpath
+from os.path import join, dirname, realpath, basename
 from fnmatch import fnmatch
 from os import listdir
 
@@ -47,13 +47,18 @@ def check_ut_monotone(filename, RowParser):
 
 def bad_files(RowParser, dirname):
     bads = []
-    for filename in list_datafiles(dirname):
+    datafiles = list_datafiles(dirname)
+    for idx, filename in enumerate(datafiles):
         if not check_ut_monotone(filename, RowParser):
+            # print("{} BAD ... {}".format(idx, filename))
             bads.append(filename)
     return bads
 
 
 if __name__ == '__main__':
-    bad_nacs_files = bad_files(NACSRow, DE2_NACS_DIR)
-    print(bad_files)
+    datapoints = 0
+    for filename in list_datafiles(DE2_NACS_DIR):
+        filedata = local_preload(filename, FileParser, NACSRow, filename)
+        datapoints += len(filedata.data)
 
+    print("Number of present datapoints: {}".format(datapoints))
