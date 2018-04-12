@@ -20,6 +20,10 @@ class FileParser:
             lines = datafile.readlines()[self.row.drop_lines:]
             self._data = array([self.row.parse(*line) for line in slice_by(lines, self.row.lines)])
 
+    def _reflect(self, filename):
+        with open(filename, 'w') as datafile:
+            file.writelines([RowParser.stringify(row) for row in self._data])
+
     def get(self, *params, transposed=False):
         idxs = [self.names.index(param) for param in params]
         data = None
@@ -36,8 +40,8 @@ class FileParser:
         diff = list(filter(lambda x: x[1] < 0, [(idx, ut[idx] - ut[idx - 1]) for idx in range(1, len(ut))]))
         if len(diff) == 0:
             return  # There's no jumps to fix
-        if len(diff) > 1:
-            raise ValueError("There's more than 1 jump in data at: {}".format(self.filename))
+        # if len(diff) > 1:
+        #     raise ValueError("There's more than 1 jump in data at: {}".format(self.filename))
         print("Fixing ut jump in data of {}".format(self.filename))
         idx = diff[0][0]
         self._data[idx:, utidx] += 24 * 3600  # seconds in 1 day

@@ -1,35 +1,10 @@
 from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
 from ionospheredata.parser import FileParser, NACSRow, WATSRow
+from ionospheredata.utils import local_preload
 
-import pickle, hashlib
-from os.path import join, dirname, realpath, basename
+from os.path import join, basename
 from fnmatch import fnmatch
 from os import listdir
-
-
-CACHE_DIR = join(dirname(realpath(__file__)), "_objects")
-FORCE_RELOAD_CACHE = False
-
-def local_preload(name, caller, *args, **kwargs):
-    def calculate():
-        # print("{} does not exist. Computing\t{} objects".format(idx, name))
-        res = caller(*args, **kwargs)
-        with open(filename, "wb") as datafile:
-            # print("\tObjects computed and stored for {}".format(name))
-            pickle.dump(res, datafile)
-            return res
-
-    idx = hashlib.md5(str(name).encode('utf-8')).hexdigest()
-    filename = join(CACHE_DIR, idx + ".pydata")
-    if FORCE_RELOAD_CACHE:
-        return calculate()
-    try:
-        with open(filename, "rb") as datafile:
-            # print("{} used to load {} objects".format(idx, name))
-            res = pickle.load(datafile)
-            return res
-    except IOError:
-        return calculate()
 
 
 def list_datafiles(dirname):
@@ -55,16 +30,74 @@ def bad_files(RowParser, dirname):
     return bads
 
 
-if __name__ == '__main__':
-    bad_nacs_files = local_preload('nacs_bad_files', bad_files, NACSRow, DE2_NACS_DIR)
-    bad_subclass = set()
-    for n, badfile in enumerate(bad_nacs_files):
-        # print("{}. {}".format(n, basename(badfile)))
-        filedata = local_preload(badfile, FileParser, NACSRow, badfile)
+def data_report(key, RowParser, dirname):
+    # bad_datafiles = local_preload('{}_bad_files'.format(key), bad_files, RowParser, dirname)
+    datafiles = list_datafiles(dirname)
+    doppelganger_class = set()
+    dc_eof = 0  # usually doppleganers appears at the end of the file, but better check it
+    dc_neof = 0
+    midnightcut_class = set()
+    jumps_per_file = {}
+    total_datapoints = 0
+    badfiles_datapoints = 0
+    good_datapoints_in_badfiles = 0
+    total_files = len(list_datafiles(dirname))
+    for n, file_name in enumerate(datafiles):
+        breaking_idx = -1
+        file_key = basename(file_name)
+        print("{}. {}".format(n, file_key))
+        filedata = local_preload(file_name, FileParser, RowParser, file_name)
         uts = filedata.get('ut_of_day', transposed=True)[0]
+        total_datapoints += len(filedata.data)
         for idx in range(1, len(uts)):
-            if uts[idx] == uts[idx - 1]:  # Must be <=
-                bad_subclass.add(badfile)
-                print("\t{}[{}/{}] {} {} {}".format('!' if idx + 1 != len(uts) else ' ', idx + 1, len(uts), uts[idx - 1], '=' if uts[idx] == uts[idx - 1] else '>', uts[idx]))
-    print("Bad subclass. Equality: {}".format(len(bad_subclass)))
+            if uts[idx] == uts[idx - 1]:
+                doppelganger_class.add(file_name)
+                if idx + 1 == len(uts):
+                    dc_eof += 1
+                else:
+                    dc_neof += 1
+                if breaking_idx == -1:  # We care about very first data compromising datapoint
+                    breaking_idx = idx - 2  # Because we count both of dopplegangers as bad datapoints
 
+            if uts[idx] < uts[idx - 1]:
+                midnightcut_class.add(file_name)
+
+                if file_key not in jumps_per_file:
+                    jumps_per_file[file_key] = list()
+                jumps_per_file[file_key].append((uts[idx - 1], uts[idx]))
+                print("\t[{}/{}] {} > {}".format(idx, len(uts), uts[idx - 1], uts[idx]))
+
+                if breaking_idx == -1:  # We care about very first data compromising datapoint
+                    breaking_idx = idx - 1
+
+        if file_name in doppelganger_class or file_name in midnightcut_class:
+            badfiles_datapoints += len(filedata.data)
+            good_datapoints_in_badfiles += breaking_idx + 1  # + 0th index
+
+    jumps_histogram = {k: len(list(filter(lambda x: len(x) == k, jumps_per_file.values()))) for k in set([len(x) for x in jumps_per_file.values()])}
+    all_badfiles = list(midnightcut_class) + list(doppelganger_class)
+    print("key: {}".format(key.upper()))
+    print("\tTotals:")
+    print("\t{}: total data points".format(total_datapoints))
+    print("\t\t{}: total data points in bad files".format(badfiles_datapoints))
+    print("\t\t{:2.4}%: % of all datapoints in bad files".format(100. * badfiles_datapoints / total_datapoints))
+    print("\t\t{}: total good datapoints in BAD files".format(good_datapoints_in_badfiles))
+    print("\t\t{}: total good datapoints in ALL files".format(total_datapoints - badfiles_datapoints + good_datapoints_in_badfiles))
+    print("\t\t{:2.4}%: ratio of good datapoints to all datapoints".format(100. - 100. * (badfiles_datapoints - good_datapoints_in_badfiles) / total_datapoints))
+    print("\t{}: total data files".format(total_files))
+    print("\t{}: total bad files".format(len(all_badfiles)))
+    print("\t\t{}: midnight cut".format(len(midnightcut_class)))
+    for jumps, files in jumps_histogram.items():
+        print("\t\t\t{} jumps in {} files".format(jumps, files))
+    print("\t\t{}: doppelgangers".format(len(doppelganger_class)))
+    print("\t\t\t{}: of them in the end of file".format(dc_eof))
+    print("\t\t\t{}: of them NOT in the end of file".format(dc_neof))
+    print("\t{:2.4}%: rate of losts with removing doppledangers".format(100 * (dc_eof + dc_neof) / total_datapoints))
+    print("Bad files:")
+    for badfile_name in sorted(all_badfiles):
+        print("\t\t{}".format(basename(badfile_name)))
+
+
+if __name__ == '__main__':
+    nacs_badfiles = data_report('nacs', NACSRow, DE2_NACS_DIR)
+    wats_badfiles = data_report('wats', WATSRow, DE2_WATS_DIR)
