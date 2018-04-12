@@ -89,3 +89,7 @@ ENV/
 
 # Sublime project
 iod.sublime-workspace
+
+
+# Project specific
+_objects/*.pydata

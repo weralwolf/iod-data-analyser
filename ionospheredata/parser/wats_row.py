@@ -1,6 +1,11 @@
 from collections import OrderedDict
 
 from .row_parser import RowParser
+from ionospheredata.utils import absolute_ut
+
+
+def wats_ut(year, day, ut_of_day, **kwargs):
+    return absolute_ut(1900 + year, day, ut_of_day)
 
 
 class WATSRow(RowParser):
@@ -9,8 +14,9 @@ class WATSRow(RowParser):
             ('year', (1, 3)),
             ('day', (3, 6)),
             # 1 - date   (I5)    [yyddd]
-            ('ut', (6, 15)),
+            ('ut_of_day', (6, 15)),
             # 2 - UT         (I9)    [ms]
+            ('ut', wats_ut),
             ('mode', (15, 17)),
             # 3 - Mode   (I2)        =3,4 measuring the horizontal velocity
             #             =5,6 measuring the vertical velocity
@@ -72,9 +78,9 @@ class WATSRow(RowParser):
             # 21 - LST    (F6.2)  [hours]   Local Solar Time
             ('lmt', (49, 55)),
             # 22 - LMT    (F6.2)  [hours]   Local Magnetic Time
-            ('l', (55, 61)),
+            ('l', (55, 60)),
             # 23 - L      (F5.2)        McIllwain L value
-            ('inv_lat', (61, 66)),
+            ('inv_lat', (60, 66)),
             # 24 - Inv. Lat.  (F6.1)  [degree]  Invariant latitude
             ('sza', (66, 73)),
             # 25 - SZA    (F7.1)  [degree]  Solar Zenith Angle

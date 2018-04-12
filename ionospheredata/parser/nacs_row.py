@@ -1,12 +1,18 @@
 from collections import OrderedDict
 
 from .row_parser import RowParser
+from ionospheredata.utils import absolute_ut
+
+
+def nacs_ut(ut_of_day, day_of_year, year, **kwargs):
+    return absolute_ut(year, day_of_year, ut_of_day)
 
 
 class NACSRow(RowParser):
     seed = [
         OrderedDict([
-            ('ut', (0, 9)),
+            ('ut_of_day', (0, 9)),
+            ('ut', nacs_ut),
             ('o_dens', (9, 22)),
             ('o_err', (22, 29)),
             ('n2_dens', (29, 42)),
@@ -28,4 +34,8 @@ class NACSRow(RowParser):
             ('sza', (167, 174)),
         ])
     ]
+    filename = OrderedDict([
+        ('year', (0, 4)),
+        ('day_of_year', (4, 7)),
+    ])
     drop_lines = 2

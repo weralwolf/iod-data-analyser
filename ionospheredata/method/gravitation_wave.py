@@ -1,10 +1,10 @@
 from matplotlib import pyplot as plt
 from numpy import array
-from numpy import ndarray
 from numpy import concatenate
+from numpy import ndarray
+from numpy import zeros
 from numpy.fft import fft
 from numpy.fft import ifft
-from numpy import zeros
 
 from ionospheredata.consts import GW_WINDOW_LEN
 from ionospheredata.consts import NFFT

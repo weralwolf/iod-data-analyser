@@ -1,14 +1,20 @@
 from os.path import join
 
 from matplotlib import pyplot as plt
-from numpy import round, abs, array
+from numpy import abs
+from numpy import array
+from numpy import round
+from numpy import searchsorted
 
-from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
+from iod.a000_config import DE2_NACS_DIR
+from iod.a000_config import DE2_WATS_DIR
 from iod.a000_config import NFFT
 from ionospheredata.method import break_points
 from ionospheredata.method import gravitation_wave
+from ionospheredata.method import nyquist_theorem
 from ionospheredata.parser import FileParser
-from ionospheredata.parser import NACSRow, WATSRow
+from ionospheredata.parser import NACSRow
+from ionospheredata.parser import WATSRow
 
 
 def main():
@@ -16,24 +22,24 @@ def main():
     nacs_data = FileParser(NACSRow, join(DE2_NACS_DIR, nacs_datafile))
 
     # Separate parameters to different dataset
-    ut_nacs = round(nacs_data.get('ut', transposed=True)[0] / 1000.)  # from `ms` to `s`
+    ut_nacs = round(nacs_data.get('ut', transposed=True)[0] / 1000.)  # `s`
     oxigen = nacs_data.get('o_dens', transposed=True)[0]  # 1/cm^3
     nitrogen = nacs_data.get('n2_dens', transposed=True)[0]  # 1/cm^3
     orbit = nacs_data.get('orbit', transposed=True)[0][0]  # No.
 
     # Looking for breaking point (BP) in NACS nacs_data
     sampling_NACS = 1
-    bps = break_points(ut_nacs, sampling_NACS)
+    nacs_bps = break_points(ut_nacs, sampling_NACS)
 
     # NACS_O
-    if len(bps) > 1:
-        O = oxigen[:int(bps[1, 0])]  # why is it impotant?.. if I need not full nacs_data set
-        N2 = nitrogen[:int(bps[1, 0])]
-        ut_nacs_1sec = ut_nacs[:int(bps[1, 0])]  # all UT nacs_data in NACS with 1 sec from start to breake point
+    if len(nacs_bps) > 1:
+        O = oxigen[:int(nacs_bps[1, 0])]  # why is it impotant?.. if I need not full nacs_data set
+        N2 = nitrogen[:int(nacs_bps[1, 0])]
+        ut_nacs_1sec = ut_nacs[:int(nacs_bps[1, 0])]  # all UT nacs_data in NACS with 1 sec from start to breake point
     else:
-        O = oxigen[:int(bps[0, 1])]
-        N2 = nitrogen[:int(bps[0, 1])]
-        ut_nacs_1sec = ut_nacs[:int(bps[0, 1])]
+        O = oxigen[:int(nacs_bps[0, 1])]
+        N2 = nitrogen[:int(nacs_bps[0, 1])]
+        ut_nacs_1sec = ut_nacs[:int(nacs_bps[0, 1])]
     L_Ox = len(O)  # length of nacs_data set after BP ... so length of nacs_data have changed
 
     # function create trend and detect GW
@@ -72,9 +78,9 @@ def main():
 
     # # iFFT wave in GW area in O and N2 nacs_data
     # gca = plt.subplot(2, 1, 2)
-    # print(GravWave_Oxigen)
     # plt.plot(abs(GravWave_Oxigen), 'r')
     # plt.plot(abs(GravWave_Nitrogen), 'g')
+    # plt.grid(True)
     # plt.title('Gravitation wave area (from spectrum')
     # plt.legend(
     #     ('Oxigen', 'Nitrogen'),
@@ -82,14 +88,13 @@ def main():
     # )
     # plt.show()
 
-    #    fpath=['E:\Sciense\DISER\work in Matlab\programs\METHODICS_2016\ ',dayOrbit];
-    #    filename=[dayOrbit,'_O-N_2'];
-    # saveas(gcf, fullfile(fpath,filename),'jpeg');
-    #     saveas(gcf, fullfile(fpath,filename),'pdf');
+    # % fpath=['E:\Sciense\DISER\work in Matlab\programs\METHODICS_2016\ ',dayOrbit];
+    # % filename=[dayOrbit,'_O-N_2'];
+    # % saveas(gcf, fullfile(fpath,filename),'jpeg');
+    # % saveas(gcf, fullfile(fpath,filename),'pdf');
 
     # WATS
     wats_datafile = '1982327_de2_wats_2s_v01.asc'
-    print(join(DE2_WATS_DIR, wats_datafile))
     wats_data = FileParser(WATSRow, join(DE2_WATS_DIR, wats_datafile))
 
     mode = wats_data.get('mode', transposed=True)[0]
@@ -97,33 +102,31 @@ def main():
     hmode = array(list(map(lambda m: m == 3 or m == 4, mode)))
 
     vsc = wats_data.get('v_sc', transposed=True)[0]
-    vz = vsc * vmode  # m/s
-    vy = vsc * hmode  # m/s
-    wats_ut = round(wats_data.get('ut', transposed=True)[0] / 1000.)  # ms
+    vz_full = vsc * vmode  # m/s
+    vy_full = vsc * hmode  # m/s
+    ut_wats = round(wats_data.get('ut', transposed=True)[0] / 1000.)  # ms
     temperature = wats_data.get('tn', transposed=True)[0]  # K
 
-    # % Harmonization of data NACS and WATS by UT
-    # [Vz_start]=Aria_WATS(UT_NACS_1sec(1), UT_WATS_Vz);
-    # [Vz_end]=UT_WATS_end_point(UT_NACS_1sec(end), UT_WATS_Vz);
 
-    # %Looking for breake poins there
-    # sampling_WATS_Vz=8;
-    # [breake_points_Vz]=BreakePoints(UT_WATS_Vz(Vz_start:Vz_end), sampling_WATS_Vz);
+    # Harmonization of data NACS and WATS by UT
+    vz_start, vz_end = searchsorted(ut_wats, [ut_nacs_1sec[0], ut_nacs_1sec[-1]])
 
-    # if (length(breake_points_Vz(:,1))>1) && (breake_points_Vz(2,1)~=breake_points_Vz(1,1))
-    #         Vz_end=Vz_start+breake_points_Vz(2,1)-1;
-    # elseif (length(breake_points_Vz(:,1))==1) || (breake_points_Vz(2,1)==breake_points_Vz(1,1))
-    #         Vz_end=Vz_end;
-    # end
+    # Looking for breake poins there
+    sampling_WATS = 8
+    wats_bps = break_points(ut_wats[vz_start:vz_end], sampling_WATS)
+    print(wats_bps)
 
-    #     Vz=VerticalWind(Vz_start:Vz_end);
-    #     T_Vz=Temperature_Vz(Vz_start:Vz_end);
-    #         L_Vz=UT_WATS_Vz(Vz_end)-UT_WATS_Vz(Vz_start); % how many seconds lost ... so how long should be data set
-    #         Length_Vz=length(Vz); % carent data set with sampling = 8 second
-    # [Vz_interpolated]=Naiquist_theorem(Vz, L_Vz, Length_Vz);
-    # [T_Vz_interpolated]=Naiquist_theorem(T_Vz, L_Vz, Length_Vz);
+    if len(wats_bps) > 1 and wats_bps[0, 0] != wats_bps[-1, 0]:
+        vz_end = vz_start + wats_bps[0, 0] - 1;
 
-    #      UT_WATS_Vz_1sec=(UT_WATS_Vz(Vz_start):1:UT_WATS_Vz(Vz_end-1))'; % each one second from the startVz to endVz
+    vz = vz_full[vz_start:vz_end]
+    t_wats = temperature[vz_start:vz_end]
+    wats_time_span = ut_wats[vz_end] - ut_wats[vz_start]  # how many seconds lost ... so how long should be data set
+    len_vz = len(vz)  # current data set with sampling = 8 second
+    vz_interpolated = nyquist_theorem(vz, wats_time_span, len_vz)
+    # [T_Vz_interpolated] = Naiquist_theorem(t_wats, wats_time_span, len_vz)
+
+    #      UT_WATS_Vz_1sec=(UT_WATS_Vz(vz_start):1:UT_WATS_Vz(vz_end-1))'; % each one second from the startVz to endVz
 
     # [Trend_Vz, wave_Vz, FFT_Vz, FFT_GW_Vz, GravWave_Vz]=GravitationWave_Wind(Vz_interpolated);
     #     L_Vz=length(Vz_interpolated);
@@ -166,6 +169,17 @@ def main():
     #      UT_WATS_Vy_1sec=(UT_WATS_Vy(Vy_start):1:UT_WATS_Vy(Vy_end))';
 
     # [Trend_Vy, wave_Vy, FFT_Vy, FFT_GW_Vy, GravWave_Vy]=GravitationWave_Wind(Vy_interpolated);
+
+
+
+
+
+
+
+
+
+
+
 
     # figure % Vy and Vy_correct coz Vy axe change direction
     #     subplot(211), plot(1:length(Vy),Vy,'r','LineWidth',2); grid on
@@ -225,7 +239,7 @@ def main():
 
 
     # %% dz
-    # [dz, FFT_dz]=Vertical_displacement_dz(Temperature_Vz(Vz_start:Vz_end), GravWave_Oxigen, GravWave_Nitrogen, L_Ox);
+    # [dz, FFT_dz]=Vertical_displacement_dz(Temperature_Vz(vz_start:vz_end), GravWave_Oxigen, GravWave_Nitrogen, L_Ox);
 
     # %[Trend_dz, Wave_dz, FFT_wave_dz, FFT_GW_dz, GravWave_dz]=GravitationWave_Wind(dz');
 
