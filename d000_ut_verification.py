@@ -56,9 +56,15 @@ def bad_files(RowParser, dirname):
 
 
 if __name__ == '__main__':
-    datapoints = 0
-    for filename in list_datafiles(DE2_NACS_DIR):
-        filedata = local_preload(filename, FileParser, NACSRow, filename)
-        datapoints += len(filedata.data)
+    bad_nacs_files = local_preload('nacs_bad_files', bad_files, NACSRow, DE2_NACS_DIR)
+    bad_subclass = set()
+    for n, badfile in enumerate(bad_nacs_files):
+        # print("{}. {}".format(n, basename(badfile)))
+        filedata = local_preload(badfile, FileParser, NACSRow, badfile)
+        uts = filedata.get('ut_of_day', transposed=True)[0]
+        for idx in range(1, len(uts)):
+            if uts[idx] < uts[idx - 1]:  # Must be <=
+                bad_subclass.add(badfile)
+                print("\t[{}/{}] {} {} {}".format(idx + 1, len(uts), uts[idx - 1], '=' if uts[idx] == uts[idx - 1] else '>', uts[idx]))
+    print("Bad subclass. Jump: {}".format(len(bad_subclass)))
 
-    print("Number of present datapoints: {}".format(datapoints))
