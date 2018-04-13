@@ -1,11 +1,35 @@
 # Development
 To bootstrap the project perform following commands:
 
+For more details on instalation PROJ see http://proj4.org/install.html
 ```
 virtualenv -p python3
 source env/bin/activate
+# Install cartography...
 pip install -r requirements.txt
 ```
+
+### Installing cartography
+For more details on instalation PROJ see http://proj4.org/install.html
+```
+pip install pyproj
+mkdir builds && cd builds/
+wget https://github.com/matplotlib/basemap/archive/v1.1.0.tar.gz
+tar -xzvf v1.1.0.tar.gz
+cd basemap-1.1.0/
+cd geos-3.3.3/
+export GEOS_DIR=/usr/local
+./configure --prefix=$GEOS_DIR
+make
+make install
+cd ..
+python setup.py install
+python -c "from mpl_toolkits.basemap import Basemap"
+cd ..
+cd ..
+rm -rf builds
+```
+
 
 ## Scripts
 - `dev.bootstrap.project.sh` - bootstrap project;
