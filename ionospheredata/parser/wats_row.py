@@ -70,10 +70,14 @@ class WATSRow(RowParser):
             # 17 - Orbit  (I6)        orbit number
             ('altitude', (23, 30)),
             # 18 - Altitude   (F7.1)  [km]
-            ('latitude', (30, 36)),
+            ('lat', (30, 36)),
             # 19 - Latitude   (F6.1)  [degree]  geographic latitude
-            ('longitude', (36, 43)),
+            ('lon', (36, 43)),
             # 20 - Longitude  (F7.1)  [degree]  geographic latitude
+            # ('latitude', (30, 36)),
+            # # 19 - Latitude   (F6.1)  [degree]  geographic latitude
+            # ('longitude', (36, 43)),
+            # # 20 - Longitude  (F7.1)  [degree]  geographic latitude
             ('lst', (43, 49)),
             # 21 - LST    (F6.2)  [hours]   Local Solar Time
             ('lmt', (49, 55)),

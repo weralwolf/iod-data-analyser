@@ -93,3 +93,5 @@ iod.sublime-workspace
 
 # Project specific
 _objects/*.pydata
+_tracks/nacs/*.png
+_tracks/wats/*.png
