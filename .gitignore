@@ -96,3 +96,4 @@ _objects/*.pydata
 _tracks/nacs/*.png
 _tracks/wats/*.png
 _tracks/*.png
+_tracks/*.html
