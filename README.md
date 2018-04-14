@@ -3,10 +3,7 @@ To bootstrap the project perform following commands:
 
 For more details on instalation PROJ see http://proj4.org/install.html
 ```
-virtualenv -p python3
-source env/bin/activate
-# Install cartography...
-pip install -r requirements.txt
+pipenv install
 ```
 
 ### Installing cartography
@@ -102,6 +99,10 @@ It is important to see precission of our methodology in identification of differ
 ### PDE earth-like grids
 ### Satellite measurements emulation
 ### Methodology error function
+
+
+# Troubleshooting
+If during drawing maps there's a strange exception... Take a look here: https://github.com/matplotlib/basemap/issues/197
 
 # Drowing dynamic maps
 1. https://bl.ocks.org/mbostock/4481520

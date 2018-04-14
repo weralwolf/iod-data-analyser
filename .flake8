@@ -1,0 +1,3 @@
+[flake8]
+exclude = .git, postponed/, .hooks, _tracks, _objects
+max-line-length = 160
