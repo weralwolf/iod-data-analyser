@@ -1,7 +1,7 @@
-from matplotlib import pyplot as plt
-from numpy import arange, array
-from os.path import abspath, join, dirname
+from os.path import join, abspath, dirname
 
+from numpy import array, arange
+from matplotlib import pyplot as plt
 
 # Fulling breake areas
 de2_path = abspath(join(dirname(__file__), '..'))

@@ -1,7 +1,8 @@
 from collections import OrderedDict
 
-from .row_parser import RowParser
 from ionospheredata.utils import absolute_ut
+
+from .row_parser import RowParser
 
 
 def nacs_ut(ut_of_day, day_of_year, year, **kwargs):

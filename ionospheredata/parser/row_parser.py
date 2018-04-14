@@ -1,6 +1,7 @@
-from collections import OrderedDict
-from ionospheredata.utils import cached_property
 from os.path import basename
+from collections import OrderedDict
+
+from ionospheredata.utils import cached_property
 
 
 class RowParser(object):
@@ -38,4 +39,3 @@ class RowParser(object):
     @property
     def lines(self):
         return len(self.seed)
-

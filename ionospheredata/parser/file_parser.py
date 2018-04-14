@@ -1,10 +1,9 @@
-from numpy import array
-from numpy import concatenate
-from numpy import transpose
+from numpy import array, transpose, concatenate
 
 
 def slice_by(it, n):
     return zip(*[it[i::n] for i in range(n)])
+
 
 class FileParser:
     def __init__(self, RowParser, filename):
@@ -14,6 +13,7 @@ class FileParser:
         self._data = None
         self._parse()
         self._ut_jump_fix()
+        self._RowParser = RowParser
 
     def _parse(self):
         with open(self.filename, 'r') as datafile:
@@ -22,7 +22,7 @@ class FileParser:
 
     def _reflect(self, filename):
         with open(filename, 'w') as datafile:
-            file.writelines([RowParser.stringify(row) for row in self._data])
+            datafile.writelines([self._RowParser.stringify(row) for row in self._data])
 
     def get(self, *params, transposed=False):
         idxs = [self.names.index(param) for param in params]

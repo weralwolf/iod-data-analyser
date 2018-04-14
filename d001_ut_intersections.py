@@ -1,12 +1,12 @@
-from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
-from ionospheredata.parser import FileParser, WATSRow, NACSRow
-from ionospheredata.utils import list_datafiles, local_preload
-
-from os.path import join, dirname, realpath, basename
 import hashlib
+from os.path import join, dirname, basename, realpath
 
+from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
+from ionospheredata.utils import local_preload, list_datafiles
+from ionospheredata.parser import NACSRow, WATSRow, FileParser
 
 CURRENT_DIR = realpath(dirname(__file__))
+
 
 def read_badfileslist(basedir, filename):
     return [join(basedir, badfilename.strip()) for badfilename in open(filename).readlines()]
@@ -14,6 +14,7 @@ def read_badfileslist(basedir, filename):
 
 def goodfiles(basedir, badfiles):
     return [fname for fname in list_datafiles(basedir) if fname not in badfiles]
+
 
 def dataof(filename):
     return open(filename, 'r').read()
@@ -87,4 +88,3 @@ def filtration(key, basedir, RowParser):
 if __name__ == "__main__":
     filtration("nacs", DE2_NACS_DIR, NACSRow)
     filtration("wats", DE2_WATS_DIR, WATSRow)
-

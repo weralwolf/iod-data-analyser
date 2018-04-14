@@ -1,10 +1,8 @@
-from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
-from ionospheredata.parser import FileParser, NACSRow, WATSRow
-from ionospheredata.utils import local_preload, list_datafiles
+from os.path import basename
 
-from os.path import join, basename
-from fnmatch import fnmatch
-from os import listdir
+from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
+from ionospheredata.utils import local_preload, list_datafiles
+from ionospheredata.parser import NACSRow, WATSRow, FileParser
 
 
 def check_ut_monotone(filename, RowParser):
@@ -79,7 +77,7 @@ def data_report(key, RowParser, dirname):
     print("\t\t{:2.4}%: % of all datapoints in bad files".format(100. * badfiles_datapoints / total_datapoints))
     print("\t\t{}: total good datapoints in BAD files".format(good_datapoints_in_badfiles))
     print("\t\t{}: total good datapoints in ALL files".format(total_datapoints - badfiles_datapoints + good_datapoints_in_badfiles))
-    print("\t\t{:2.4}%: ratio of good datapoints to all datapoints".format(100. - 100. * (badfiles_datapoints - good_datapoints_in_badfiles) / total_datapoints))
+    print("\t\t{:2.4}%: ratio of good datapoints to all datapoints".format(100. - 100 * (badfiles_datapoints - good_datapoints_in_badfiles) / total_datapoints))
     print("\t{}: total data files".format(total_files))
     print("\t{}: total bad files".format(len(all_badfiles)))
     print("\t\t{}: midnight cut".format(len(midnightcut_class)))

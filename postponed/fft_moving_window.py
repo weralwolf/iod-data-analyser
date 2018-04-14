@@ -1,4 +1,4 @@
-from numpy import arange, ones, concatenate, zeros, transpose
+from numpy import ones, zeros, arange, transpose, concatenate
 from numpy.fft import fft
 from matplotlib import pyplot as plt
 

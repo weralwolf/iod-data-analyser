@@ -1,20 +1,11 @@
 from os.path import join
 
+from numpy import abs, array, round, searchsorted
 from matplotlib import pyplot as plt
-from numpy import abs
-from numpy import array
-from numpy import round
-from numpy import searchsorted
 
-from iod.a000_config import DE2_NACS_DIR
-from iod.a000_config import DE2_WATS_DIR
-from iod.a000_config import NFFT
-from ionospheredata.method import break_points
-from ionospheredata.method import gravitation_wave
-from ionospheredata.method import nyquist_theorem
-from ionospheredata.parser import FileParser
-from ionospheredata.parser import NACSRow
-from ionospheredata.parser import WATSRow
+from iod.a000_config import NFFT, DE2_NACS_DIR, DE2_WATS_DIR
+from ionospheredata.method import break_points, nyquist_theorem, gravitation_wave
+from ionospheredata.parser import NACSRow, WATSRow, FileParser
 
 
 def main():

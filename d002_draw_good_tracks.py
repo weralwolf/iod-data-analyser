@@ -1,14 +1,13 @@
+from os.path import join, dirname, basename, realpath
+from datetime import datetime
+
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
 from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
-from ionospheredata.parser import FileParser, NACSRow, WATSRow
-from ionospheredata.utils import list_datafiles, local_preload
-
-from os.path import join, dirname, realpath, basename
-from datetime import datetime
-
+from ionospheredata.utils import list_datafiles
+from ionospheredata.parser import NACSRow, WATSRow, FileParser
 
 CURRENT_DIR = realpath(dirname(__file__))
 IMAGES_DIR = join(CURRENT_DIR, "_tracks")
@@ -21,7 +20,6 @@ def chunkup(RowParser, filename):
     ut = data.get('ut', transposed=True)[0]
     lat = data.get('lat', transposed=True)[0]
     lon = data.get('lon', transposed=True)[0]
-
 
     chunks = list()
     sidx = 0
@@ -36,12 +34,8 @@ def chunkup(RowParser, filename):
     return chunks
 
 
-
-
 def date_signature(ut_start, ut_end):
     return "{} - {}".format(datetime.utcfromtimestamp(ut_start).strftime("%H:%M:%S"), datetime.utcfromtimestamp(ut_end).strftime("%H:%M:%S"))
-
-
 
 
 def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):

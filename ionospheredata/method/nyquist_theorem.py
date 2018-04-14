@@ -1,10 +1,10 @@
-
-from numpy import linspace
+# from numpy import linspace
 
 
 def nyquist_theorem(data, time_span, length):
-    t_wats = linspace(1, length, time_span)
-    td_wats = linspace(1, length, length)
+    pass
+    # t_wats = linspace(1, length, time_span)
+    # td_wats = linspace(1, length, length)
 
 # function [Vz_interpolated]=Naiquist_theorem(Vz, L, Length_Vz)
 #     % Naiquist theorem (Kotelnikov)

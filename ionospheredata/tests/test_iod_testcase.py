@@ -1,7 +1,6 @@
-from numpy import array
-from numpy import matrix
-from numpy import ones
-from numpy import zeros
+import unittest
+
+from numpy import ones, array, zeros, matrix
 
 from ionospheredata.tests.iodtc import IODTestCase
 
@@ -50,6 +49,7 @@ class TestIODTestCase(IODTestCase):
                 matrix([[1, 1], [1, 1]]),
                 matrix([[1, 1, 1], [1, 1, 1]])
             )
+
 
 if __name__ == '__main__':
     unittest.main()

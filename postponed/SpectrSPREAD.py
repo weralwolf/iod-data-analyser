@@ -1,20 +1,9 @@
 import math
 
+from numpy import pi, exp, fft, sin, ones, array, zeros, arange, absolute, transpose, concatenate
 from matplotlib import pyplot as plt
-from numpy import absolute
-from numpy import arange
-from numpy import array
-from numpy import concatenate
-from numpy import exp
-from numpy import fft
-from numpy import pi
-from numpy import sin
-from numpy import transpose
-from numpy import zeros
-from numpy import ones
 
-from ionospheredata.calc import linspace
-from ionospheredata.calc import pmap
+from ionospheredata.calc import pmap, linspace
 
 
 def main():

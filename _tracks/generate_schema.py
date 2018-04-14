@@ -1,7 +1,6 @@
-from os.path import join, dirname, realpath, basename
 from os import listdir
 from fnmatch import fnmatch
-
+from os.path import join, dirname, basename, realpath
 
 CURRENT_DIR = realpath(dirname(__file__))
 day_tpl = """<!DOCTYPE html>

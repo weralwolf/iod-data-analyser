@@ -1,6 +1,6 @@
-import pickle, hashlib
+import pickle
+import hashlib
 from os.path import join, dirname, realpath
-
 
 CACHE_DIR = join(dirname(realpath(__file__)), "..", "..", "_objects")
 
@@ -25,4 +25,3 @@ def local_preload(name, caller, *args, cache_dir=CACHE_DIR, force_reload=False, 
             return res
     except IOError:
         return calculate()
-

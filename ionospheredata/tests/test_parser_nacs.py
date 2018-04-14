@@ -1,12 +1,10 @@
-from os.path import abspath
-from os.path import dirname
-from os.path import join
+from os.path import join, abspath, dirname
 from unittest import TestCase
 
-from ionospheredata.parser import FileParser
-from ionospheredata.parser import NACSRow
+from ionospheredata.parser import NACSRow, FileParser
 
 TESTDATAPATH = abspath(join(dirname(__file__), 'test_data'))
+
 
 class TestParserNASC(TestCase):
     def test_simple(self):
