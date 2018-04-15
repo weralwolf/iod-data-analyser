@@ -1,4 +1,96 @@
-1981220T133820_0_DE2_NACS_1S_V01.ASC
+from os import listdir
+from fnmatch import fnmatch
+from os.path import join
+
+from iod.a000_config import TRACKS_DIR
+
+day_tpl = """<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DE-2 data processing. {year} year, {day} day.</title>
+  </head>
+  <body>
+    <div width="100%"><img src="./{year}-{day}-mercator.png" width="100%" /></div>
+    <div width="100%"><img src="./{year}-{day}-poles.png" width="100%" /></div>
+  </body>
+</html>
+"""
+day_name = "day-{year}-{day}.html"
+index_content_tpl = """<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>DE-2 data processing. Data filtration and tracks depiction</title>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    </head>
+    <body>
+      <div class="container-fluid">
+        <div width="100%" class="processing-description">
+          <h1>Filtration description</h1>
+          <div width="100%">
+              <h2>General statements</h2>
+                Data filtration consist of a few steps to obtain lists of "good files":
+                <ol>
+                    <li>Select only files with increasingly monotone UT;</li>
+                    <li>Select only unique files;</li>
+                    <li>Select only files which UT is not intersecting with others;</li>
+                </ol>
+                In some cases first type of filtered out files can be fixed. There's 2 usual problems:
+                <ol>
+                    <li>UT duplicates: removing both saves big chunks of data;</li>
+                    <li>Midnight overlaps: some files drop UT after crossing midnight, so elevating it on 86400000 milliseconds will fix this;</li>
+                </ol>
+
+                But, unfortunately only NACS files seems to be easy to fix, since all dopplegangers are situated at the end of files
+                and there's not more that one UT-drop per file. More details in device specific sections.
+          </div>
+          <div width="100%">
+              <h2>NACS specifics</h2>
+              <pre>8986459: total data points
+4644: total data files
+558: total bad files (not increasingly monotone UT)
+  94: midnight cut
+    1 jumps in 94 files
+  476: doppelgangers
+    476: of them in the end of file
+    0: of them NOT in the end of file
+4060: files left after filtering
+7793701: datapoints left after filtering
+86.73% of data used for further processing
+</pre>
+             First stage of filtration removed 558 files with not increasingly monotone UT, second stage detected 2 pairs of identical
+             files and third stage detected 24 intersecting file. Hence totally 594 bad files were ignored during processing of NACS data.
+<blockquote>List of all ignored files at the end of the page.</blockquote>
+          </div>
+        </div>
+          <div width="100%">
+              <h2>WATS specifics</h2>
+              <pre>3049552: total data points
+  573038: total data points in bad files
+534: total data files
+86: total bad files (not increasingly monotone UT)
+  81: midnight cut
+    1 jumps in 64 files
+    2 jumps in 16 files
+    3 jumps in 1 files
+  7: doppelgangers
+    0: of them in the end of file
+    7: of them NOT in the end of file
+448 files left after filtering
+2476514 datapoints left
+81.21% of data used for further processing</pre>
+             First stage of filtration removed 86 files with not increasingly monotone UT, second stage detected 0 pairs of identical
+             files and third stage detected 0 intersecting file. Hence totally 86 bad files were ignored during processing of WATS data.
+<blockquote>List of all ignored files at the end of the page.</blockquote>
+          </div>
+        </div>
+        {years_list}
+        <div>
+          <h2>List of all ignored files at NACS</h2>
+<pre>1981220T133820_0_DE2_NACS_1S_V01.ASC
 1981220T150000_0_DE2_NACS_1S_V01.ASC
 1981234T020000_1_DE2_NACS_1S_V01.ASC
 1981237T143820_0_DE2_NACS_1S_V01.ASC
@@ -568,3 +660,152 @@
 1983045T003140_0_DE2_NACS_1S_V01.ASC
 1983045T041140_0_DE2_NACS_1S_V01.ASC
 1983045T155820_0_DE2_NACS_1S_V01.ASC
+1981267T231820_0_DE2_NACS_1S_V01.ASC
+1981264T073640_0_DE2_NACS_1S_V01.ASC
+1981285T163320_2_DE2_NACS_1S_V01.ASC
+1982030T191320_0_DE2_NACS_1S_V01.ASC
+1982329T052820_0_DE2_NACS_1S_V01.ASC
+1981276T194640_0_DE2_NACS_1S_V01.ASC
+1981347T213140_0_DE2_NACS_1S_V01.ASC
+1981306T124500_0_DE2_NACS_1S_V01.ASC
+1981316T164500_0_DE2_NACS_1S_V01.ASC
+1982329T050820_0_DE2_NACS_1S_V01.ASC
+1982007T080640_0_DE2_NACS_1S_V01.ASC
+1982030T214000_0_DE2_NACS_1S_V01.ASC
+1981296T140820_0_DE2_NACS_1S_V01.ASC
+1981265T150820_0_DE2_NACS_1S_V01.ASC
+1981353T200000_0_DE2_NACS_1S_V01.ASC
+1981265T152320_1_DE2_NACS_1S_V01.ASC
+1981353T195140_0_DE2_NACS_1S_V01.ASC
+1981285T163820_0_DE2_NACS_1S_V01.ASC
+1981276T194640_1_DE2_NACS_1S_V01.ASC
+1982021T084820_0_DE2_NACS_1S_V01.ASC
+1981296T145000_0_DE2_NACS_1S_V01.ASC
+1982021T095000_0_DE2_NACS_1S_V01.ASC
+1982007T080640_1_DE2_NACS_1S_V01.ASC
+1981316T170000_0_DE2_NACS_1S_V01.ASC
+1981347T235820_0_DE2_NACS_1S_V01.ASC
+1981306T124500_1_DE2_NACS_1S_V01.ASC</pre>
+        </div>
+        <div>
+          <h2>List of all ignored files at WATS</h2>
+<pre>1981249_de2_wats_2s_v01.asc
+1981256_de2_wats_2s_v01.asc
+1981267_de2_wats_2s_v01.asc
+1981287_de2_wats_2s_v01.asc
+1981289_de2_wats_2s_v01.asc
+1981300_de2_wats_2s_v01.asc
+1981306_de2_wats_2s_v01.asc
+1981322_de2_wats_2s_v01.asc
+1981327_de2_wats_2s_v01.asc
+1981337_de2_wats_2s_v01.asc
+1981337_de2_wats_2s_v01.asc
+1981358_de2_wats_2s_v01.asc
+1981359_de2_wats_2s_v01.asc
+1981360_de2_wats_2s_v01.asc
+1981361_de2_wats_2s_v01.asc
+1981362_de2_wats_2s_v01.asc
+1981363_de2_wats_2s_v01.asc
+1981364_de2_wats_2s_v01.asc
+1982002_de2_wats_2s_v01.asc
+1982005_de2_wats_2s_v01.asc
+1982007_de2_wats_2s_v01.asc
+1982009_de2_wats_2s_v01.asc
+1982014_de2_wats_2s_v01.asc
+1982015_de2_wats_2s_v01.asc
+1982016_de2_wats_2s_v01.asc
+1982025_de2_wats_2s_v01.asc
+1982026_de2_wats_2s_v01.asc
+1982028_de2_wats_2s_v01.asc
+1982030_de2_wats_2s_v01.asc
+1982031_de2_wats_2s_v01.asc
+1982047_de2_wats_2s_v01.asc
+1982071_de2_wats_2s_v01.asc
+1982092_de2_wats_2s_v01.asc
+1982096_de2_wats_2s_v01.asc
+1982098_de2_wats_2s_v01.asc
+1982105_de2_wats_2s_v01.asc
+1982136_de2_wats_2s_v01.asc
+1982145_de2_wats_2s_v01.asc
+1982149_de2_wats_2s_v01.asc
+1982151_de2_wats_2s_v01.asc
+1982157_de2_wats_2s_v01.asc
+1982158_de2_wats_2s_v01.asc
+1982159_de2_wats_2s_v01.asc
+1982168_de2_wats_2s_v01.asc
+1982171_de2_wats_2s_v01.asc
+1982172_de2_wats_2s_v01.asc
+1982180_de2_wats_2s_v01.asc
+1982195_de2_wats_2s_v01.asc
+1982198_de2_wats_2s_v01.asc
+1982225_de2_wats_2s_v01.asc
+1982230_de2_wats_2s_v01.asc
+1982236_de2_wats_2s_v01.asc
+1982249_de2_wats_2s_v01.asc
+1982250_de2_wats_2s_v01.asc
+1982251_de2_wats_2s_v01.asc
+1982255_de2_wats_2s_v01.asc
+1982261_de2_wats_2s_v01.asc
+1982274_de2_wats_2s_v01.asc
+1982276_de2_wats_2s_v01.asc
+1982279_de2_wats_2s_v01.asc
+1982286_de2_wats_2s_v01.asc
+1982292_de2_wats_2s_v01.asc
+1982301_de2_wats_2s_v01.asc
+1982304_de2_wats_2s_v01.asc
+1982306_de2_wats_2s_v01.asc
+1982307_de2_wats_2s_v01.asc
+1982307_de2_wats_2s_v01.asc
+1982313_de2_wats_2s_v01.asc
+1982324_de2_wats_2s_v01.asc
+1982329_de2_wats_2s_v01.asc
+1982333_de2_wats_2s_v01.asc
+1982334_de2_wats_2s_v01.asc
+1982344_de2_wats_2s_v01.asc
+1982351_de2_wats_2s_v01.asc
+1982352_de2_wats_2s_v01.asc
+1982355_de2_wats_2s_v01.asc
+1982356_de2_wats_2s_v01.asc
+1982359_de2_wats_2s_v01.asc
+1982360_de2_wats_2s_v01.asc
+1982362_de2_wats_2s_v01.asc
+1983008_de2_wats_2s_v01.asc
+1983009_de2_wats_2s_v01.asc
+1983011_de2_wats_2s_v01.asc
+1983015_de2_wats_2s_v01.asc
+1983024_de2_wats_2s_v01.asc
+1983026_de2_wats_2s_v01.asc
+1983037_de2_wats_2s_v01.asc
+1983041_de2_wats_2s_v01.asc</pre>
+        </div>
+      </div>
+    </body>
+</html>"""
+year_tpl = """
+<div width="100%" class="maps-links">
+  <h2>DE-2 tracks for {year} year</h2>
+  {links_list}
+</div>
+"""
+day_link_tpl = "<a href=\"./day-{year}-{day}.html\">{year}-{day}</a>"
+
+
+days_set = {fname[:8] for fname in listdir(TRACKS_DIR) if fnmatch(fname, '*.png')}
+links_per_years = {}
+for yd in days_set:
+    year = yd[:4]
+    day = yd[-3:]
+    with open(join(TRACKS_DIR, day_name.format(year=year, day=day)), 'w') as dayfile:
+        dayfile.write(day_tpl.format(year=year, day=day))
+        if year not in links_per_years:
+            links_per_years[year] = []
+        links_per_years[year].append(day_link_tpl.format(year=year, day=day))
+
+
+years = []
+for year in sorted(links_per_years.keys()):
+    links = sorted(links_per_years[year])
+    years.append(year_tpl.format(year=year, links_list=", ".join(links)))
+
+with open(join(TRACKS_DIR, 'index.html'), 'w') as index:
+    index.write(index_content_tpl.format(years_list="".join(years)))

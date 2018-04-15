@@ -1,8 +1,8 @@
 import pickle
 import hashlib
-from os.path import join, dirname, realpath
+from os.path import join
 
-CACHE_DIR = join(dirname(realpath(__file__)), "..", "..", "_objects")
+from iod.a000_config import CACHE_DIR
 
 
 def local_preload(name, caller, *args, cache_dir=CACHE_DIR, force_reload=False, **kwargs):

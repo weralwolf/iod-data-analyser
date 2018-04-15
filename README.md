@@ -6,6 +6,14 @@ For more details on instalation PROJ see http://proj4.org/install.html
 pipenv install
 ```
 
+## Project init
+```
+env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.6.5
+```
+
+# Prerequisits
+pyenv, pipenv, autotool
+
 ### Installing cartography
 For more details on instalation PROJ see http://proj4.org/install.html
 ```
@@ -26,7 +34,6 @@ cd ..
 cd ..
 rm -rf builds
 ```
-
 
 ## Scripts
 - `dev.bootstrap.project.sh` - bootstrap project;
@@ -102,7 +109,19 @@ It is important to see precission of our methodology in identification of differ
 
 
 # Troubleshooting
+## Matplotlib
+> RuntimeError: Python is not installed as a framework. The Mac OS X backend will not be able to function correctly if Python is not installed as a framework. See the Python documentation for more information on installing Python as a framework on Mac OS X. Please either reinstall Python as a framework, or try one of the other backends. If you are using (Ana)Conda please install python.app and replace the use of 'python' with 'pythonw'. See 'Working with Matplotlib on OSX' in the Matplotlib FAQ for more information.
+
+```
+env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.5.4
+```
+
+## Matplotlib basemap
 If during drawing maps there's a strange exception... Take a look here: https://github.com/matplotlib/basemap/issues/197
+
+`ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()` line 4783. Change statement to `if False:`.
+
+Edit `<virtualend path>/lib/python3.6/site-packages/mpl_toolkits/basemap/__init__.py`
 
 # Drowing dynamic maps
 1. https://bl.ocks.org/mbostock/4481520

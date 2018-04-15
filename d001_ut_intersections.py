@@ -1,11 +1,9 @@
 import hashlib
-from os.path import join, dirname, basename, realpath
+from os.path import join, basename
 
-from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
+from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR, ARTEFACTS_DIR
 from ionospheredata.utils import local_preload, list_datafiles
 from ionospheredata.parser import NACSRow, WATSRow, FileParser
-
-CURRENT_DIR = realpath(dirname(__file__))
 
 
 def read_badfileslist(basedir, filename):
@@ -52,7 +50,11 @@ def find_intersections(filenames, RowParser):
 
 
 def filtration(key, basedir, RowParser):
-    datafiles = goodfiles(basedir, read_badfileslist(basedir, join(CURRENT_DIR, 'README.{}.BADFILES.txt'.format(key.upper()))))
+    badfiles = read_badfileslist(
+        basedir,
+        join(ARTEFACTS_DIR, '{}.notmonotone.txt'.format(key.upper()))
+    )
+    datafiles = goodfiles(basedir, badfiles)
     print("key: {}".format(key.upper()))
     print("\t{}: total number of good datafiles".format(len(datafiles)))
     duplicates = find_duplicates(datafiles)
@@ -80,9 +82,23 @@ def filtration(key, basedir, RowParser):
     for fname in duplicates:
         print("\t{}".format(basename(fname)))
 
+    with open(join(ARTEFACTS_DIR, '{}.duplicates.txt'.format(key.upper())), 'w') as datafile:
+        datafile.writelines([basename(filename) for filename in sorted(duplicates)])
+
     print("\nIntersected files:")
     for fname in total_intersections_list:
         print("\t{}".format(basename(fname)))
+
+    with open(join(ARTEFACTS_DIR, '{}.intersections.txt'.format(key.upper())), 'w') as datafile:
+        datafile.writelines([basename(filename) for filename in sorted(intersections)])
+
+    with open(join(ARTEFACTS_DIR, '{}.ignore.txt'.format(key.upper())), 'w') as datafile:
+        datafile.writelines([basename(filename) for filename in sorted(badfiles)])
+        datafile.writelines([basename(filename) for filename in sorted(intersections)])
+        datafile.writelines([basename(filename) for filename in sorted(duplicates)])
+
+    with open(join(ARTEFACTS_DIR, '{}.good.txt'.format(key.upper())), 'w') as datafile:
+        datafile.writelines([basename(filename) for filename in sorted(datafiles)])
 
 
 if __name__ == "__main__":

@@ -1,18 +1,16 @@
-from os.path import join, dirname, basename, realpath
+from matplotlib import use as setRenderingBackend  # isort:skip noqua:E402
+setRenderingBackend('TkAgg')  # isort:skip
+
+from os.path import join, basename  # noqua:E402
 from datetime import datetime
 
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
-from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
+from iod.a000_config import TRACKS_DIR, DE2_NACS_DIR, DE2_WATS_DIR, ARTEFACTS_DIR
 from ionospheredata.utils import list_datafiles
 from ionospheredata.parser import NACSRow, WATSRow, FileParser
-
-CURRENT_DIR = realpath(dirname(__file__))
-IMAGES_DIR = join(CURRENT_DIR, "_tracks")
-NACS_IMAGES_DIR = join(IMAGES_DIR, "nacs")
-WATS_IMAGES_DIR = join(IMAGES_DIR, "wats")
 
 
 def chunkup(RowParser, filename):
@@ -153,10 +151,10 @@ def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):
 
 
 def draw_tracks(destination_dir=None):
-    nacs_ignores = [join(DE2_NACS_DIR, fname.strip()) for fname in open(join(CURRENT_DIR, "README.NACS.IGNORE.txt"), 'r').readlines()]
+    nacs_ignores = [join(DE2_NACS_DIR, fname.strip()) for fname in open(join(ARTEFACTS_DIR, "NACS.ignore.txt"), 'r').readlines()]
     nacs_goodfiles = [fname for fname in list_datafiles(DE2_NACS_DIR) if fname not in nacs_ignores]
 
-    wats_ignores = [join(DE2_WATS_DIR, fname.strip()) for fname in open(join(CURRENT_DIR, "README.WATS.IGNORE.txt"), 'r').readlines()]
+    wats_ignores = [join(DE2_WATS_DIR, fname.strip()) for fname in open(join(ARTEFACTS_DIR, "WATS.ignore.txt"), 'r').readlines()]
     wats_goodfiles = [fname for fname in list_datafiles(DE2_WATS_DIR) if fname not in wats_ignores]
 
     files_by_days = {}
@@ -191,6 +189,7 @@ def draw_tracks(destination_dir=None):
 
 
 if __name__ == "__main__":
-    draw_tracks(IMAGES_DIR)
+    draw_tracks(TRACKS_DIR)
 
 # User to draw polar cups: https://github.com/matplotlib/basemap/issues/350
+# flake8: noqa

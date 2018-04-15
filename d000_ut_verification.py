@@ -1,6 +1,6 @@
-from os.path import basename
+from os.path import join, basename
 
-from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR
+from iod.a000_config import DE2_NACS_DIR, DE2_WATS_DIR, ARTEFACTS_DIR
 from ionospheredata.utils import local_preload, list_datafiles
 from ionospheredata.parser import NACSRow, WATSRow, FileParser
 
@@ -90,6 +90,9 @@ def data_report(key, RowParser, dirname):
     print("Bad files:")
     for badfile_name in sorted(all_badfiles):
         print("\t\t{}".format(basename(badfile_name)))
+
+    with open(join(ARTEFACTS_DIR, "{}.notmonotone.txt".format(key)), 'w') as datafile:
+        datafile.writelines([basename(filename) for filename in badfile_name])
 
 
 if __name__ == '__main__':
