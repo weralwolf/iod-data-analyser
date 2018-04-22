@@ -156,3 +156,19 @@ Edit `<virtualend path>/lib/python3.6/site-packages/mpl_toolkits/basemap/__init_
 2. Чорновик обробки даних;
 
 Знайти своє місце в обробці. Зрозуміти, що я шукаю, що локалізовую.
+
+
+# Interpolation of Irregularly Sampled Data Series
+1. [Interpolation of Irregularly Sampled Data Series---A Survey](ftp://ftp.adass.org/adass/proceedings/adass94/adorfhm2.html)
+2. [Resampling Nonuniformly Sampled Signals](https://www.mathworks.com/help/signal/examples/resampling-nonuniformly-sampled-signals.html)
+3. [Unevenly spaced time series](https://www.wikiwand.com/en/Unevenly_spaced_time_series)
+4. [How to Normalize and Standardize Time Series Data in Python](https://machinelearningmastery.com/normalize-standardize-time-series-data-python/)
+5. [A gentle inroduction to resampling techniques](https://pdfs.semanticscholar.org/9cd6/be2808c9827bbaf8f479461bf730cee2d70a.pdf)
+6. [How To Resample and Interpolate Your Time Series Data With Python](https://machinelearningmastery.com/resample-interpolate-time-series-data-python/)
+7. [Fourier transforms of data sampled in unequally spaced segments](http://adsbit.harvard.edu/cgi-bin/nph-iarticle_query?1979AJ.....84..116M&defaultprint=YES&filetype=.pdf)
+8. [Generalized nonlinear inverse problems solved using the least squares criterion](http://www.ipgp.fr/~tarantola/Files/Professional/Papers_PDF/GeneralizedNonlinear_original.pdf)
+9. [Algorithms for Unevenly Spaced Time Series: Moving Averages and Other Rolling Operators](http://eckner.com/papers/Algorithms%20for%20Unevenly%20Spaced%20Time%20Series.pdf)
+10. [Comparison of correlation analysis techniques for irregularly sampled time series](https://www.nonlin-processes-geophys.net/18/389/2011/npg-18-389-2011.pdf)
+11. [A Framework for the Analysis of Unevenly Spaced Time Series Data](http://www.eckner.com/papers/unevenly_spaced_time_series_analysis.pdf)
+12. [A Note on Trend and Seasonality Estimation for Unevenly Spaced Time Series](http://eckner.com/papers/Trend%20and%20Seasonality%20Estimation%20for%20Unevenly%20Spaced%20Time%20Series.pdf)
+13. [Andreas Eckner research page. Unevenly spaced time series publications](http://www.eckner.com/research.html)
