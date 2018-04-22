@@ -92,7 +92,7 @@ def data_report(key, RowParser, dirname):
         print("\t\t{}".format(basename(badfile_name)))
 
     with open(join(ARTEFACTS_DIR, "{}.notmonotone.txt".format(key)), 'w') as datafile:
-        datafile.writelines([basename(filename) for filename in badfile_name])
+        datafile.write("\n".join([basename(filename) for filename in all_badfiles]))
 
 
 if __name__ == '__main__':
