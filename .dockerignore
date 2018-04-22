@@ -1,0 +1,5 @@
+_artifacts/*
+.git/*
+.hooks/*
+.gitignore
+install_git_hooks.sh

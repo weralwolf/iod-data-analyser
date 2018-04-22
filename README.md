@@ -123,6 +123,10 @@ If during drawing maps there's a strange exception... Take a look here: https://
 
 Edit `<virtualend path>/lib/python3.6/site-packages/mpl_toolkits/basemap/__init__.py`
 
+
+# Future plans
+1. Time map with d3: http://bl.ocks.org/tnightingale/4718717
+
 # Drowing dynamic maps
 1. https://bl.ocks.org/mbostock/4481520
 2. https://bl.ocks.org/mbostock/4458497
@@ -152,4 +156,3 @@ Edit `<virtualend path>/lib/python3.6/site-packages/mpl_toolkits/basemap/__init_
 2. Чорновик обробки даних;
 
 Знайти своє місце в обробці. Зрозуміти, що я шукаю, що локалізовую.
-
