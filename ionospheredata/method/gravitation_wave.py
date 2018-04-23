@@ -7,14 +7,14 @@ from .utils import smooth
 
 
 def gravitation_wave(concentration):
-    """Computes a gravity wave by concentration function.
+    '''Computes a gravity wave by concentration function.
     @param concentration: is a concentration function over the time along satellite's trajectory. shape is (N, );
     @return (trend, wave, wave_fft, grav_wave)
         trend - global change of cnocentration. Obtained by smoothing;
         wave - is a concentration variation. Difference of concentration and trend;
         wave_fft - Fast Fourie Tranformation of wave;
         grav_wave - gravitational wave.
-    """
+    '''
     data_len = len(concentration)
     zero_fill = zeros((NFFT - data_len, ))
     extended_concentration = concatenate((concentration, zero_fill))

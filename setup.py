@@ -5,37 +5,37 @@ from setuptools import setup, find_packages
 
 
 def long_description():
-    with open("README.md", "r") as readme:
+    with open('README.md', 'r') as readme:
         return readme.read()
 
 
 def packages():
-    return find_packages(include=["{project_name}*"])
+    return find_packages(include=['{project_name}*'])
 
 
 def install_requires():
-    with open("requirements.txt", "r") as requirements:
+    with open('requirements.txt', 'r') as requirements:
         return requirements.readlines()
 
 
 setup(
-    name="{project_name}",
-    version="0.0.1",
-    description="{description}",
+    name='{project_name}',
+    version='0.0.1',
+    description='{description}',
     long_description=long_description(),
-    url="{url}",
-    author="{author}",
-    author_email="{author_email}",
-    license="{license}",
+    url='{url}',
+    author='{author}',
+    author_email='{author_email}',
+    license='{license}',
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        'Development Status :: 3 - Alpha',
     ],
-    keywords="{keywords}",
+    keywords='{keywords}',
     packages=packages(),
     install_requires=install_requires(),
-    test_suite="nose.collector",
+    test_suite='nose.collector',
     entry_points={
-        "console_scripts": [
+        'console_scripts': [
         ]
     }
 )

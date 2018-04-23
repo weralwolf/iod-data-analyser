@@ -16,7 +16,7 @@ day_tpl = """<!DOCTYPE html>
   </body>
 </html>
 """
-day_name = "day-{year}-{day}.html"
+day_name = 'day-{year}-{day}.html'
 index_content_tpl = """<!DOCTYPE html>
 <html>
     <head>
@@ -787,7 +787,7 @@ year_tpl = """
   {links_list}
 </div>
 """
-day_link_tpl = "<a href=\"./day-{year}-{day}.html\">{year}-{day}</a>"
+day_link_tpl = '<a href="./day-{year}-{day}.html">{year}-{day}</a>'
 
 
 days_set = {fname[:8] for fname in listdir(TRACKS_DIR) if fnmatch(fname, '*.png')}
@@ -805,7 +805,7 @@ for yd in days_set:
 years = []
 for year in sorted(links_per_years.keys()):
     links = sorted(links_per_years[year])
-    years.append(year_tpl.format(year=year, links_list=", ".join(links)))
+    years.append(year_tpl.format(year=year, links_list=', '.join(links)))
 
 with open(join(TRACKS_DIR, 'index.html'), 'w') as index:
-    index.write(index_content_tpl.format(years_list="".join(years)))
+    index.write(index_content_tpl.format(years_list=''.join(years)))

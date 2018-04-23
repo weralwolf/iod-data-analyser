@@ -29,9 +29,9 @@ def find_duplicates(filenames):
     for fhash, fnames in hashes.items():
         if len(fnames) < 2:
             continue
-        print("\n\t{}".format(fhash))
+        print('\n\t{}'.format(fhash))
         for fname in fnames:
-            print("\t\t{}".format(basename(fname)))
+            print('\t\t{}'.format(basename(fname)))
 
     return {ec[0] for ec in hashes.values() if len(ec) > 1}
 
@@ -44,7 +44,7 @@ def find_intersections(filenames, RowParser):
         cdata = local_preload(filenames[idx], FileParser, RowParser, filenames[idx]).get('ut', transposed=True)[0]
         if pdata[-1] > cdata[0]:
             intersected.append([filenames[idx - 1], filenames[idx]])
-            # print("{} & {}\n\t{} > {}".format(basename(filenames[idx - 1]), basename(filenames[idx]), pdata[-1], cdata[0]))
+            # print('{} & {}\n\t{} > {}'.format(basename(filenames[idx - 1]), basename(filenames[idx]), pdata[-1], cdata[0]))
 
     return set(sum(intersected, []))
 
@@ -55,50 +55,50 @@ def filtration(key, basedir, RowParser):
         join(ARTEFACTS_DIR, '{}.notmonotone.txt'.format(key.upper()))
     )
     datafiles = goodfiles(basedir, badfiles)
-    print("key: {}".format(key.upper()))
-    print("\t{}: total number of good datafiles".format(len(datafiles)))
+    print('key: {}'.format(key.upper()))
+    print('\t{}: total number of good datafiles'.format(len(datafiles)))
     duplicates = find_duplicates(datafiles)
     filtered_datafiles = list(set(datafiles).difference(duplicates))
-    print("\t{}: total number of exclusive datafiles".format(len(filtered_datafiles)))
+    print('\t{}: total number of exclusive datafiles'.format(len(filtered_datafiles)))
     total_intersections_list = []
     iteration_number = 0
     while True:
         intersections = find_intersections(filtered_datafiles, RowParser)
-        print("\t{} iteration. Intersection search".format(iteration_number))
+        print('\t{} iteration. Intersection search'.format(iteration_number))
         iteration_number += 1
-        print("\t\t{} files are intersecting".format(len(intersections)))
+        print('\t\t{} files are intersecting'.format(len(intersections)))
         if len(intersections) == 0:
             break
         total_intersections_list += list(intersections)
         filtered_datafiles = list(set(filtered_datafiles).difference(intersections))
 
-    print("{} files left after filtering".format(len(filtered_datafiles)))
+    print('{} files left after filtering'.format(len(filtered_datafiles)))
     total_datapoints = sum([
         len(local_preload(filename, FileParser, RowParser, filename).get('ut', transposed=True)[0])
         for filename in filtered_datafiles
     ])
-    print("{} datapoints left".format(total_datapoints))
-    print("\nDuplicated files:")
+    print('{} datapoints left'.format(total_datapoints))
+    print('\nDuplicated files:')
     for fname in duplicates:
-        print("\t{}".format(basename(fname)))
+        print('\t{}'.format(basename(fname)))
 
     with open(join(ARTEFACTS_DIR, '{}.duplicates.txt'.format(key.upper())), 'w') as datafile:
-        datafile.write("\n".join([basename(filename) for filename in sorted(duplicates)]))
+        datafile.write('\n'.join([basename(filename) for filename in sorted(duplicates)]))
 
-    print("\nIntersected files:")
+    print('\nIntersected files:')
     for fname in total_intersections_list:
-        print("\t{}".format(basename(fname)))
+        print('\t{}'.format(basename(fname)))
 
     with open(join(ARTEFACTS_DIR, '{}.intersections.txt'.format(key.upper())), 'w') as datafile:
-        datafile.write("\n".join([basename(filename) for filename in sorted(intersections)]))
+        datafile.write('\n'.join([basename(filename) for filename in sorted(intersections)]))
 
     with open(join(ARTEFACTS_DIR, '{}.ignore.txt'.format(key.upper())), 'w') as datafile:
-        datafile.write("\n".join([basename(filename) for filename in sorted(list(badfiles) + list(intersections) + list(duplicates))]))
+        datafile.write('\n'.join([basename(filename) for filename in sorted(list(badfiles) + list(intersections) + list(duplicates))]))
 
     with open(join(ARTEFACTS_DIR, '{}.good.txt'.format(key.upper())), 'w') as datafile:
-        datafile.write("\n".join([basename(filename) for filename in sorted(datafiles)]))
+        datafile.write('\n'.join([basename(filename) for filename in sorted(datafiles)]))
 
 
-if __name__ == "__main__":
-    filtration("nacs", DE2_NACS_DIR, NACSRow)
-    filtration("wats", DE2_WATS_DIR, WATSRow)
+if __name__ == '__main__':
+    filtration('nacs', DE2_NACS_DIR, NACSRow)
+    filtration('wats', DE2_WATS_DIR, WATSRow)

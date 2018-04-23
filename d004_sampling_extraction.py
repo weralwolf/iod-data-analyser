@@ -41,7 +41,7 @@ def chunkup(data):
             ongoing_sampling
         ))
     for n, (start, end, length, sampling) in enumerate(chunks):
-        print("{}.\t{}\t- {}\t{} / {}".format(n, start, end, sampling, length))
+        print('{}.\t{}\t- {}\t{} / {}'.format(n, start, end, sampling, length))
 
     return chunks
 
@@ -65,7 +65,7 @@ def find_samipling(deltas, upper_sampling):
             match += deltas[idx]
         else:
             matched_samiplings.append(sampling)
-            # print("\t{}: matched!".format(sampling))
+            # print('\t{}: matched!'.format(sampling))
     return matched_samiplings
 
 
@@ -77,16 +77,16 @@ def artifacts(key, sampling):
 
 
 def make_deltas(key, dirname, RowParser):
-    print("{}. Reading datafiles".format(key.upper()))
+    print('{}. Reading datafiles'.format(key.upper()))
     datafiles = [join(dirname, fname.strip()) for fname in open(join(ARTEFACTS_DIR, '{}.good.txt'.format(key.upper())), 'r').readlines()]
     data = [
         local_preload(fname, FileParser, RowParser, fname)
         for fname in sorted(datafiles)
     ]
     deltas = []
-    print("{}. Concatenate total ut".format(key.upper()))
+    print('{}. Concatenate total ut'.format(key.upper()))
     ut = concatenate([datafile.get('ut', transposed=True)[0] for datafile in data], axis=0)
-    print("{}. Compute deltas".format(key.upper()))
+    print('{}. Compute deltas'.format(key.upper()))
     for idx in range(1, len(ut)):
         deltas.append(ut[idx] - ut[idx - 1])
 
@@ -94,7 +94,7 @@ def make_deltas(key, dirname, RowParser):
 
 
 def sample(key, dirname, RowParser, sampling):
-    deltas, ut = local_preload("{}-deltas".format(key), make_deltas, key, dirname, RowParser)
+    deltas, ut = local_preload('{}-deltas'.format(key), make_deltas, key, dirname, RowParser)
 
     # 1. Split on chunks with gaps no longer than sampling;
     # 2. Iterate over datashifts 0 <= j < sampling;
@@ -102,10 +102,10 @@ def sample(key, dirname, RowParser, sampling):
     # 4. Exclude multiples of matched samplings;
     # 5. Store (t_start, t_end, sampling) taking in acount sampling shift j;
 
-    print("{}: Total length of ut".format(len(ut)))
+    print('{}: Total length of ut'.format(len(ut)))
     minimum_sequence_length = 500
     working_samplings = []
-    print("{}: sampling to check".format(sampling))
+    print('{}: sampling to check'.format(sampling))
     starts_at = 0
     for idx in range(len(deltas)):
         if deltas[idx] > sampling and idx - starts_at > minimum_sequence_length:
@@ -115,15 +115,15 @@ def sample(key, dirname, RowParser, sampling):
                 inner_samplings = find_samipling(deltas[starts_at + shift:idx], sampling)
                 if len(inner_samplings) > 0:
                     if not printed:
-                        print("\t{} - {}".format(ut[starts_at], ut[idx]))
+                        print('\t{} - {}'.format(ut[starts_at], ut[idx]))
                         printed = True
-                    print("\t\t+{} / {}: shift / samplings count".format(shift, len(inner_samplings)))
+                    print('\t\t+{} / {}: shift / samplings count'.format(shift, len(inner_samplings)))
                     working_samplings.append({
-                        "indexes": (starts_at + shift, idx),
-                        "segment": (ut[starts_at + shift], ut[idx]),
-                        "lengt": idx - starts_at - shift + 1,
-                        "duration": ut[idx] - ut[starts_at + shift],
-                        "samplings": inner_samplings,
+                        'indexes': (starts_at + shift, idx),
+                        'segment': (ut[starts_at + shift], ut[idx]),
+                        'lengt': idx - starts_at - shift + 1,
+                        'duration': ut[idx] - ut[starts_at + shift],
+                        'samplings': inner_samplings,
                     })
                 shift += 1
             starts_at = idx + 1
@@ -136,7 +136,7 @@ def sample(key, dirname, RowParser, sampling):
     with open(by_length, 'w') as artifact:
         json.dump(sorted(
             working_samplings,
-            key=lambda x: (-x["duration"], max(x["samplings"]), x["segment"][0])
+            key=lambda x: (-x['duration'], max(x['samplings']), x['segment'][0])
         ), artifact)
 
 

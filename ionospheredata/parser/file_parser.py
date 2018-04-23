@@ -31,7 +31,7 @@ class FileParser:
             idx = idxs[0]
             data = self._data[:, idx:(idx + 1)]
         else:
-            data = concatenate((self._data[:, idx:(idx + 1)] for idx in idxs), axis=1)
+            data = concatenate([self._data[:, idx:(idx + 1)] for idx in idxs], axis=1)
         return data if not transposed else transpose(data)
 
     def _ut_jump_fix(self):
@@ -41,8 +41,8 @@ class FileParser:
         if len(diff) == 0:
             return  # There's no jumps to fix
         # if len(diff) > 1:
-        #     raise ValueError("There's more than 1 jump in data at: {}".format(self.filename))
-        print("Fixing ut jump in data of {}".format(self.filename))
+        #     raise ValueError('There's more than 1 jump in data at: {}'.format(self.filename))
+        print('Fixing ut jump in data of {}'.format(self.filename))
         idx = diff[0][0]
         self._data[idx:, utidx] += 24 * 3600  # seconds in 1 day
 

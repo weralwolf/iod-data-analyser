@@ -19,7 +19,7 @@ def bad_files(RowParser, dirname):
     datafiles = list_datafiles(dirname)
     for idx, filename in enumerate(datafiles):
         if not check_ut_monotone(filename, RowParser):
-            # print("{} BAD ... {}".format(idx, filename))
+            # print('{} BAD ... {}'.format(idx, filename))
             bads.append(filename)
     return bads
 
@@ -39,7 +39,7 @@ def data_report(key, RowParser, dirname):
     for n, file_name in enumerate(datafiles):
         breaking_idx = -1
         file_key = basename(file_name)
-        print("{}. {}".format(n, file_key))
+        print('{}. {}'.format(n, file_key))
         filedata = local_preload(file_name, FileParser, RowParser, file_name)
         uts = filedata.get('ut_of_day', transposed=True)[0]
         total_datapoints += len(filedata.data)
@@ -59,7 +59,7 @@ def data_report(key, RowParser, dirname):
                 if file_key not in jumps_per_file:
                     jumps_per_file[file_key] = list()
                 jumps_per_file[file_key].append((uts[idx - 1], uts[idx]))
-                print("\t[{}/{}] {} > {}".format(idx, len(uts), uts[idx - 1], uts[idx]))
+                print('\t[{}/{}] {} > {}'.format(idx, len(uts), uts[idx - 1], uts[idx]))
 
                 if breaking_idx == -1:  # We care about very first data compromising datapoint
                     breaking_idx = idx - 1
@@ -70,29 +70,29 @@ def data_report(key, RowParser, dirname):
 
     jumps_histogram = {k: len(list(filter(lambda x: len(x) == k, jumps_per_file.values()))) for k in set([len(x) for x in jumps_per_file.values()])}
     all_badfiles = list(midnightcut_class) + list(doppelganger_class)
-    print("key: {}".format(key.upper()))
-    print("\tTotals:")
-    print("\t{}: total data points".format(total_datapoints))
-    print("\t\t{}: total data points in bad files".format(badfiles_datapoints))
-    print("\t\t{:2.4}%: % of all datapoints in bad files".format(100. * badfiles_datapoints / total_datapoints))
-    print("\t\t{}: total good datapoints in BAD files".format(good_datapoints_in_badfiles))
-    print("\t\t{}: total good datapoints in ALL files".format(total_datapoints - badfiles_datapoints + good_datapoints_in_badfiles))
-    print("\t\t{:2.4}%: ratio of good datapoints to all datapoints".format(100. - 100 * (badfiles_datapoints - good_datapoints_in_badfiles) / total_datapoints))
-    print("\t{}: total data files".format(total_files))
-    print("\t{}: total bad files".format(len(all_badfiles)))
-    print("\t\t{}: midnight cut".format(len(midnightcut_class)))
+    print('key: {}'.format(key.upper()))
+    print('\tTotals:')
+    print('\t{}: total data points'.format(total_datapoints))
+    print('\t\t{}: total data points in bad files'.format(badfiles_datapoints))
+    print('\t\t{:2.4}%: % of all datapoints in bad files'.format(100. * badfiles_datapoints / total_datapoints))
+    print('\t\t{}: total good datapoints in BAD files'.format(good_datapoints_in_badfiles))
+    print('\t\t{}: total good datapoints in ALL files'.format(total_datapoints - badfiles_datapoints + good_datapoints_in_badfiles))
+    print('\t\t{:2.4}%: ratio of good datapoints to all datapoints'.format(100. - 100 * (badfiles_datapoints - good_datapoints_in_badfiles) / total_datapoints))
+    print('\t{}: total data files'.format(total_files))
+    print('\t{}: total bad files'.format(len(all_badfiles)))
+    print('\t\t{}: midnight cut'.format(len(midnightcut_class)))
     for jumps, files in jumps_histogram.items():
-        print("\t\t\t{} jumps in {} files".format(jumps, files))
-    print("\t\t{}: doppelgangers".format(len(doppelganger_class)))
-    print("\t\t\t{}: of them in the end of file".format(dc_eof))
-    print("\t\t\t{}: of them NOT in the end of file".format(dc_neof))
-    print("\t{:2.4}%: rate of losts with removing doppledangers".format(100 * (dc_eof + dc_neof) / total_datapoints))
-    print("Bad files:")
+        print('\t\t\t{} jumps in {} files'.format(jumps, files))
+    print('\t\t{}: doppelgangers'.format(len(doppelganger_class)))
+    print('\t\t\t{}: of them in the end of file'.format(dc_eof))
+    print('\t\t\t{}: of them NOT in the end of file'.format(dc_neof))
+    print('\t{:2.4}%: rate of losts with removing doppledangers'.format(100 * (dc_eof + dc_neof) / total_datapoints))
+    print('Bad files:')
     for badfile_name in sorted(all_badfiles):
-        print("\t\t{}".format(basename(badfile_name)))
+        print('\t\t{}'.format(basename(badfile_name)))
 
-    with open(join(ARTEFACTS_DIR, "{}.notmonotone.txt".format(key)), 'w') as datafile:
-        datafile.write("\n".join([basename(filename) for filename in all_badfiles]))
+    with open(join(ARTEFACTS_DIR, '{}.notmonotone.txt'.format(key)), 'w') as datafile:
+        datafile.write('\n'.join([basename(filename) for filename in all_badfiles]))
 
 
 if __name__ == '__main__':

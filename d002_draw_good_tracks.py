@@ -28,32 +28,32 @@ def chunkup(RowParser, filename):
             sidx = idx
 
     chunks.append([list(lat[sidx:]), list(lon[sidx:]), list(ut[sidx:])])
-    print("\t\t{} :points // {}: chunks at {}".format(len(ut), len(chunks), basename(filename)))
+    print('\t\t{} :points // {}: chunks at {}'.format(len(ut), len(chunks), basename(filename)))
     return chunks
 
 
 def date_signature(ut_start, ut_end):
-    return "{} - {}".format(datetime.utcfromtimestamp(ut_start).strftime("%H:%M:%S"), datetime.utcfromtimestamp(ut_end).strftime("%H:%M:%S"))
+    return '{} - {}'.format(datetime.utcfromtimestamp(ut_start).strftime('%H:%M:%S'), datetime.utcfromtimestamp(ut_end).strftime('%H:%M:%S'))
 
 
 def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):
-    poles_save_to = None if destination_dir is None else join(destination_dir, "{}-{}-poles.png".format(year, day))
-    mercat_save_to = None if destination_dir is None else join(destination_dir, "{}-{}-mercator.png".format(year, day))
+    poles_save_to = None if destination_dir is None else join(destination_dir, '{}-{}-poles.png'.format(year, day))
+    mercat_save_to = None if destination_dir is None else join(destination_dir, '{}-{}-mercator.png'.format(year, day))
     track_colors = [
-        "#A7414A",
-        "#282726",
-        "#6A8A82",
-        "#A37C27",
-        "#563838",
-        "#720017",
-        "#763F02",
-        "#04060F",
-        "#03353E",
-        "#C1403D",
-        "#52591F",
+        '#A7414A',
+        '#282726',
+        '#6A8A82',
+        '#A37C27',
+        '#563838',
+        '#720017',
+        '#763F02',
+        '#04060F',
+        '#03353E',
+        '#C1403D',
+        '#52591F',
     ]
-    water_color = "#A7DBDB"
-    land_color = "#E0E4CC"
+    water_color = '#A7DBDB'
+    land_color = '#E0E4CC'
 
     fig = plt.figure(figsize=(20, 10), dpi=75)
 
@@ -74,11 +74,11 @@ def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):
 
     for n, (lat, lon, ut) in enumerate(nacs_chunks):
         line = npole_map.plot(lon, lat, linestyle='-', linewidth=1, latlon=True, color=track_colors[n % len(track_colors)])
-        nlegend.append([line[0], "nacs, {}".format(date_signature(ut[0], ut[-1]))])
+        nlegend.append([line[0], 'nacs, {}'.format(date_signature(ut[0], ut[-1]))])
 
     for n, (lat, lon, ut) in enumerate(wats_chunks):
         line = npole_map.plot(lon, lat, linestyle='dotted', linewidth=2, latlon=True, color=track_colors[n % len(track_colors)])
-        nlegend.append([line[0], "wats, {}".format(date_signature(ut[0], ut[-1]))])
+        nlegend.append([line[0], 'wats, {}'.format(date_signature(ut[0], ut[-1]))])
 
     leg = plt.legend(*zip(*nlegend))
     leg.get_frame().set_alpha(0.3)
@@ -100,11 +100,11 @@ def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):
 
     for n, (lat, lon, ut) in enumerate(nacs_chunks):
         line = spole_map.plot(lon, lat, linestyle='-', linewidth=1, latlon=True, color=track_colors[n % len(track_colors)])
-        slegend.append([line[0], "nacs, {}".format(date_signature(ut[0], ut[-1]))])
+        slegend.append([line[0], 'nacs, {}'.format(date_signature(ut[0], ut[-1]))])
 
     for n, (lat, lon, ut) in enumerate(wats_chunks):
         line = spole_map.plot(lon, lat, linestyle='dotted', linewidth=2, latlon=True, color=track_colors[n % len(track_colors)])
-        slegend.append([line[0], "wats, {}".format(date_signature(ut[0], ut[-1]))])
+        slegend.append([line[0], 'wats, {}'.format(date_signature(ut[0], ut[-1]))])
 
     leg = plt.legend(*zip(*slegend))
     leg.get_frame().set_alpha(0.3)
@@ -132,11 +132,11 @@ def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):
 
     for n, (lat, lon, ut) in enumerate(nacs_chunks):
         line = mercator_map.plot(lon, lat, linestyle='-', linewidth=1, latlon=True, color=track_colors[n % len(track_colors)])
-        mlegend.append([line[0], "nacs, {}".format(date_signature(ut[0], ut[-1]))])
+        mlegend.append([line[0], 'nacs, {}'.format(date_signature(ut[0], ut[-1]))])
 
     for n, (lat, lon, ut) in enumerate(wats_chunks):
         line = mercator_map.plot(lon, lat, linestyle='dotted', linewidth=2, latlon=True, color=track_colors[n % len(track_colors)])
-        mlegend.append([line[0], "wats, {}".format(date_signature(ut[0], ut[-1]))])
+        mlegend.append([line[0], 'wats, {}'.format(date_signature(ut[0], ut[-1]))])
 
     leg = plt.legend(*zip(*mlegend))
     leg.get_frame().set_alpha(0.3)
@@ -151,10 +151,10 @@ def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):
 
 
 def draw_tracks(destination_dir=None):
-    nacs_ignores = [join(DE2_NACS_DIR, fname.strip()) for fname in open(join(ARTEFACTS_DIR, "NACS.ignore.txt"), 'r').readlines()]
+    nacs_ignores = [join(DE2_NACS_DIR, fname.strip()) for fname in open(join(ARTEFACTS_DIR, 'NACS.ignore.txt'), 'r').readlines()]
     nacs_goodfiles = [fname for fname in list_datafiles(DE2_NACS_DIR) if fname not in nacs_ignores]
 
-    wats_ignores = [join(DE2_WATS_DIR, fname.strip()) for fname in open(join(ARTEFACTS_DIR, "WATS.ignore.txt"), 'r').readlines()]
+    wats_ignores = [join(DE2_WATS_DIR, fname.strip()) for fname in open(join(ARTEFACTS_DIR, 'WATS.ignore.txt'), 'r').readlines()]
     wats_goodfiles = [fname for fname in list_datafiles(DE2_WATS_DIR) if fname not in wats_ignores]
 
     files_by_days = {}
@@ -162,33 +162,33 @@ def draw_tracks(destination_dir=None):
         year_day = basename(filename)[:7]
         if year_day not in files_by_days:
             files_by_days[year_day] = {
-                "nacs": [],
-                "wats": [],
+                'nacs': [],
+                'wats': [],
             }
-        files_by_days[year_day]["nacs"].append(filename)
+        files_by_days[year_day]['nacs'].append(filename)
 
     for filename in wats_goodfiles:
         year_day = basename(filename)[:7]
         if year_day not in files_by_days:
             files_by_days[year_day] = {
-                "nacs": [],
-                "wats": [],
+                'nacs': [],
+                'wats': [],
             }
-        files_by_days[year_day]["wats"].append(filename)
+        files_by_days[year_day]['wats'].append(filename)
 
     for yearday in sorted(files_by_days.keys()):
-        print("{}: Year/Day".format(yearday))
-        print("\t{}: Number of files".format(len(files_by_days[yearday])))
-        nacs_chunks = sum([chunkup(NACSRow, filename) for filename in files_by_days[yearday]["nacs"]], [])
-        wats_chunks = sum([chunkup(WATSRow, filename) for filename in files_by_days[yearday]["wats"]], [])
-        print("\t{}: Total NACS chunks".format(len(nacs_chunks)))
-        print("\t{}: Total WATS chunks".format(len(wats_chunks)))
+        print('{}: Year/Day'.format(yearday))
+        print('\t{}: Number of files'.format(len(files_by_days[yearday])))
+        nacs_chunks = sum([chunkup(NACSRow, filename) for filename in files_by_days[yearday]['nacs']], [])
+        wats_chunks = sum([chunkup(WATSRow, filename) for filename in files_by_days[yearday]['wats']], [])
+        print('\t{}: Total NACS chunks'.format(len(nacs_chunks)))
+        print('\t{}: Total WATS chunks'.format(len(wats_chunks)))
         year_value = yearday[:4]
         day_value = yearday[4:]
         draw_chunks(year_value, day_value, nacs_chunks, wats_chunks, destination_dir)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     draw_tracks(TRACKS_DIR)
 
 # User to draw polar cups: https://github.com/matplotlib/basemap/issues/350
