@@ -1,5 +1,5 @@
 import json
-from math import ceil, floor
+from math import ceil, sqrt, floor
 from os.path import join, exists
 
 from numpy import concatenate
@@ -46,27 +46,18 @@ def chunkup(data):
     return chunks
 
 
-def find_samipling(deltas, upper_sampling):
-    matched_samiplings = []
-    for sampling in range(2, upper_sampling + 1):
-        repetition = False
-        for match in matched_samiplings:
-            if sampling % match == 0:
-                repetition = True
-                break
-        if repetition:
-            continue
-        match = 0
-        for idx in range(0, len(deltas)):
-            if match == sampling:
-                match = 0
-            elif match > sampling:
-                break
-            match += deltas[idx]
-        else:
-            matched_samiplings.append(sampling)
-            # print('\t{}: matched!'.format(sampling))
-    return matched_samiplings
+def verify_sampling(deltas, sampling):
+    match = 0
+    points = 0
+    for idx in range(0, len(deltas)):
+        if match == sampling:
+            points += 1
+            match = 0
+        elif match > sampling:
+            return None
+        match += deltas[idx]
+    else:
+        return points + int(match == sampling)
 
 
 def artifacts(key, sampling):
@@ -103,27 +94,28 @@ def sample(key, dirname, RowParser, sampling):
     # 5. Store (t_start, t_end, sampling) taking in acount sampling shift j;
 
     print('{}: Total length of ut'.format(len(ut)))
-    minimum_sequence_length = 500
+    min_sequence_duration = 250 * sqrt(sampling)
     working_samplings = []
     print('{}: sampling to check'.format(sampling))
     starts_at = 0
     for idx in range(len(deltas)):
-        if deltas[idx] > sampling and idx - starts_at > minimum_sequence_length:
+        if deltas[idx] > sampling and ut[idx] - ut[starts_at] > min_sequence_duration:
             printed = False
             shift = 0
             while sum(deltas[starts_at:starts_at + shift]) < sampling:
-                inner_samplings = find_samipling(deltas[starts_at + shift:idx], sampling)
-                if len(inner_samplings) > 0:
+                points = verify_sampling(deltas[starts_at + shift:idx], sampling)
+                if points is not None and points > 0:
                     if not printed:
                         print('\t{} - {}'.format(ut[starts_at], ut[idx]))
                         printed = True
-                    print('\t\t+{} / {}: shift / samplings count'.format(shift, len(inner_samplings)))
+                    print('\t\t+{} / {}: shift / sampling'.format(shift, sampling))
                     working_samplings.append({
                         'indexes': (starts_at + shift, idx),
+                        'length': idx - starts_at - shift + 1,
+                        'points': points,
                         'segment': (ut[starts_at + shift], ut[idx]),
-                        'lengt': idx - starts_at - shift + 1,
                         'duration': ut[idx] - ut[starts_at + shift],
-                        'samplings': inner_samplings,
+                        'resolution': float(sampling) / points,
                     })
                 shift += 1
             starts_at = idx + 1
@@ -136,7 +128,7 @@ def sample(key, dirname, RowParser, sampling):
     with open(by_length, 'w') as artifact:
         json.dump(sorted(
             working_samplings,
-            key=lambda x: (-x['duration'], max(x['samplings']), x['segment'][0])
+            key=lambda x: (-x['duration'], x['segment'][0])
         ), artifact)
 
 
