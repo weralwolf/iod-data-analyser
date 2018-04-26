@@ -97,3 +97,4 @@ _artifacts/tracks/nacs/*.png
 _artifacts/tracks/wats/*.png
 _artifacts/tracks/*.png
 _artifacts/tracks/*.html
+_artifacts/*.json

@@ -1,24 +1,9 @@
-FROM python:3.6.5 AS preprocessor
-
-# Download datafiles
-ENV FTP_NASA_SERVER="spdf.gsfc.nasa.gov" \
-    PATH_NACS="/pub/data/de/de2/neutral_gas_nacs/n_T_1s_ascii/data" \
-    PATH_WATS="/pub/data/de/de2/neutral_gas_wats/n_T_v_2s_ascii"
-
-RUN mkdir /data && \
-    cd /data && \
-    wget -c -nv -m ftp://${FTP_NASA_SERVER}${PATH_NACS}/*.ASC && \
-    mv ${FTP_NASA_SERVER}${PATH_NACS} nacs/ && \
-    wget -nv -m ftp://${FTP_NASA_SERVER}${PATH_WATS}/*.asc && \
-    mv ${FTP_NASA_SERVER}${PATH_WATS} wats && \
-    rm -rf ${FTP_NASA_SERVER}
-
-ENV DE2SOURCE_NACS_DIR="/data/nacs" \
-    DE2SOURCE_WATS_DIR="/data/wats"
+FROM weralwolf/de2-data:latest AS preprocessor
 
 # Installing Basemap
 ENV GEOS_DIR="/usr/local"
-RUN pip install pyproj numpy && \
+RUN pip install --upgrade pip && \
+    pip install pyproj numpy && \
     mkdir build && \
     cd build/ && \
     wget https://github.com/matplotlib/basemap/archive/v1.1.0.tar.gz && \
@@ -46,10 +31,12 @@ ENV CACHE_DIR="/processing/cache" \
 WORKDIR /usr/app
 ADD Pipfile* ./
 
-RUN pip install pipenv && \
+RUN export PATH=/usr/local/bin:$PATH && \
+    ln -s /usr/local/bin/python /bin/python && \
+    pip install pipenv && \
     pipenv install --system --dev && \
     pipenv install --system
 
 COPY . /usr/app
 # ENTRYPOINT [""]
-CMD ["python", "./0000_analysis.py]
+# CMD ["python", "./0000_analysis.py]

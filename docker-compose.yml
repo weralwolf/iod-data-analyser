@@ -1,0 +1,10 @@
+version: '2'
+services:
+  iod:
+    build: .
+    restart: always
+    volumes:
+      - ".:/usr/app"
+    environment:
+      ENV: Local
+    command: ./manage.py exec ut_verification

@@ -2,7 +2,7 @@ import pickle
 import hashlib
 from os.path import join
 
-from iod.a000_config import CACHE_DIR
+from .settings import CACHE_DIR
 
 
 def local_preload(name, caller, *args, cache_dir=CACHE_DIR, force_reload=False, **kwargs):
@@ -16,7 +16,7 @@ def local_preload(name, caller, *args, cache_dir=CACHE_DIR, force_reload=False, 
 
     idx = hashlib.md5(str(name).encode('utf-8')).hexdigest()
     filename = join(cache_dir, idx + '.pydata')
-    if force_reload:
+    if force_reload or CACHE_DIR is None:
         return calculate()
     try:
         with open(filename, 'rb') as datafile:
