@@ -2,7 +2,7 @@ import pickle
 import hashlib
 from os.path import join
 
-from .settings import CACHE_DIR
+from ionospheredata.settings import CACHE_DIR
 
 
 def local_preload(name, caller, *args, cache_dir=CACHE_DIR, force_reload=False, **kwargs):

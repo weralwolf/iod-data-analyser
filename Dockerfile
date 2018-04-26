@@ -39,4 +39,4 @@ RUN export PATH=/usr/local/bin:$PATH && \
 
 COPY . /usr/app
 # ENTRYPOINT [""]
-# CMD ["python", "./0000_analysis.py]
+CMD ["python", "./manage.py", "exec", "all"]

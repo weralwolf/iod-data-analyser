@@ -13,15 +13,17 @@ def list_commands():
     commands = []
     for fname in listdir(CURRENT_DIR):
         own_name = basename(fname)
-        if fnmatch(fname, '*.py') and own_name != '__init__':
-            unparsed_index, name = match('^(c\d*)?_?(.*)\.py$', own_name).groups()
+        if fnmatch(fname, '*.py') and own_name != 'chalk.py':
+            pattern_match = match('^c(\d*)?_?(.*)\.py$', own_name)
+            if pattern_match is None:
+                continue
+            unparsed_index, name = pattern_match.groups()
             index = None if unparsed_index == '' else int(unparsed_index)
             commands.append(dict(
                 index=index,
                 unparsed_index=unparsed_index,
                 name=name,
-                module_name=own_name[:-3],
-                package='commands',
+                module_name='commands.{}'.format(own_name[:-3]),
             ))
     return commands
 
@@ -33,5 +35,5 @@ def find_command(id, commands):
 
 
 def execute_command(command):
-    command_module = import_module(command['module_name'], package=command['package'])
+    command_module = import_module(command['module_name'])
     command_module.main()

@@ -2,7 +2,7 @@ from os.path import join, basename
 
 from ionospheredata.utils import local_preload, list_datafiles
 from ionospheredata.parser import NACSRow, WATSRow, FileParser
-from ionospheredata.settings import DE2_NACS_DIR, DE2_WATS_DIR, ARTEFACTS_DIR
+from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR
 
 from .logger import logger
 
@@ -72,7 +72,7 @@ def data_report(key, RowParser, dirname):
 
     jumps_histogram = {k: len(list(filter(lambda x: len(x) == k, jumps_per_file.values()))) for k in set([len(x) for x in jumps_per_file.values()])}
     all_badfiles = list(midnightcut_class) + list(doppelganger_class)
-    logger.info('key: {}'.format(key.upper()))
+    logger.info('key: {}'.format(key))
     logger.info('\tTotals:')
     logger.info('\t{}: total data points'.format(total_datapoints))
     logger.info('\t\t{}: total data points in bad files'.format(badfiles_datapoints))
@@ -91,17 +91,17 @@ def data_report(key, RowParser, dirname):
     logger.info('\t\t\t{}: of them in the end of file'.format(dc_eof))
     logger.info('\t\t\t{}: of them NOT in the end of file'.format(dc_neof))
     logger.info('\t{:2.4}%: rate of losts with removing doppledangers'.format(100 * (dc_eof + dc_neof) / total_datapoints))
-    logger.degub('Bad files:')
+    logger.debug('Bad files:')
     for badfile_name in sorted(all_badfiles):
         logger.debug('\t\t{}'.format(basename(badfile_name)))
 
-    with open(join(ARTEFACTS_DIR, '{}.notmonotone.txt'.format(key)), 'w') as datafile:
+    with open(join(ARTIFACTS_DIR, '{}.notmonotone.txt'.format(key)), 'w') as datafile:
         datafile.write('\n'.join([basename(filename) for filename in all_badfiles]))
 
 
 def main():
-    data_report('nacs', NACSRow, DE2_NACS_DIR)
-    data_report('wats', WATSRow, DE2_WATS_DIR)
+    data_report('nacs', NACSRow, DE2SOURCE_NACS_DIR)
+    data_report('wats', WATSRow, DE2SOURCE_WATS_DIR)
 
 
 if __name__ == '__main__':
