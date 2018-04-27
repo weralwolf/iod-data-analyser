@@ -7,9 +7,9 @@ from commands import find_command, list_commands, execute_command
 
 
 def execute_selected_command(command_name, *args):
-    commands = sorted(list_commands(), key=lambda x: x['index'])
+    commands = sorted(list_commands(), key=lambda x: x['index'] or 0)
     if command_name == 'all':
-        for command in commands:
+        for command in filter(lambda x: x['index'] is not None, commands):
             execute_command(command)
         return
 
