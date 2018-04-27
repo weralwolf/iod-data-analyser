@@ -790,22 +790,26 @@ year_tpl = """
 day_link_tpl = '<a href="./day-{year}-{day}.html">{year}-{day}</a>'
 
 
-days_set = {fname[:8] for fname in listdir(TRACKS_DIR) if fnmatch(fname, '*.png')}
-links_per_years = {}
-for yd in days_set:
-    year = yd[:4]
-    day = yd[-3:]
-    with open(join(TRACKS_DIR, day_name.format(year=year, day=day)), 'w') as dayfile:
-        dayfile.write(day_tpl.format(year=year, day=day))
-        if year not in links_per_years:
-            links_per_years[year] = []
-        links_per_years[year].append(day_link_tpl.format(year=year, day=day))
+def main():
+    days_set = {fname[:8] for fname in listdir(TRACKS_DIR) if fnmatch(fname, '*.png')}
+    links_per_years = {}
+    for yd in days_set:
+        year = yd[:4]
+        day = yd[-3:]
+        with open(join(TRACKS_DIR, day_name.format(year=year, day=day)), 'w') as dayfile:
+            dayfile.write(day_tpl.format(year=year, day=day))
+            if year not in links_per_years:
+                links_per_years[year] = []
+            links_per_years[year].append(day_link_tpl.format(year=year, day=day))
+
+    years = []
+    for year in sorted(links_per_years.keys()):
+        links = sorted(links_per_years[year])
+        years.append(year_tpl.format(year=year, links_list=', '.join(links)))
+
+    with open(join(TRACKS_DIR, 'index.html'), 'w') as index:
+        index.write(index_content_tpl.format(years_list=''.join(years)))
 
 
-years = []
-for year in sorted(links_per_years.keys()):
-    links = sorted(links_per_years[year])
-    years.append(year_tpl.format(year=year, links_list=', '.join(links)))
-
-with open(join(TRACKS_DIR, 'index.html'), 'w') as index:
-    index.write(index_content_tpl.format(years_list=''.join(years)))
+if __name__ == '__main__':
+    main()

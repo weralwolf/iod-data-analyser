@@ -98,3 +98,5 @@ _artifacts/tracks/wats/*.png
 _artifacts/tracks/*.png
 _artifacts/tracks/*.html
 _artifacts/*.json
+.DS_Store
+*/.DS_Store

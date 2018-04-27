@@ -2,11 +2,13 @@ import json
 from math import ceil, sqrt, floor
 from os.path import join, exists
 
-from numpy import concatenate
+from numpy import array, concatenate
 
 from ionospheredata.utils import local_preload
 from ionospheredata.parser import NACSRow, WATSRow, FileParser
 from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR
+
+from .logger import logger
 
 
 def round(x):
@@ -41,7 +43,7 @@ def chunkup(data):
             ongoing_sampling
         ))
     for n, (start, end, length, sampling) in enumerate(chunks):
-        print('{}.\t{}\t- {}\t{} / {}'.format(n, start, end, sampling, length))
+        logger.info('{}.\t{}\t- {}\t{} / {}'.format(n, start, end, sampling, length))
 
     return chunks
 
@@ -68,24 +70,22 @@ def artifacts(key, sampling):
 
 
 def make_deltas(key, dirname, RowParser):
-    print('{}. Reading datafiles'.format(key))
+    logger.info('{}. Reading datafiles'.format(key))
     datafiles = [join(dirname, fname.strip()) for fname in open(join(ARTIFACTS_DIR, '{}.good.txt'.format(key)), 'r').readlines()]
-    data = [
-        local_preload(fname, FileParser, RowParser, fname)
+    ut = concatenate([
+        local_preload(fname, FileParser, RowParser, fname).get('ut', transposed=True)[0]
         for fname in sorted(datafiles)
-    ]
+    ], axis=0)
     deltas = []
-    print('{}. Concatenate total ut'.format(key))
-    ut = concatenate([datafile.get('ut', transposed=True)[0] for datafile in data], axis=0)
-    print('{}. Compute deltas'.format(key))
-    for idx in range(1, len(ut)):
-        deltas.append(ut[idx] - ut[idx - 1])
-
+    logger.info('{}. Compute deltas'.format(key))
+    logger.info('{}: total keys'.format(len(ut)))
+    deltas = (concatenate([ut, array([0])]) - concatenate([array([0]), ut]))[1:]
     return deltas, ut
 
 
 def sample(key, dirname, RowParser, sampling):
     deltas, ut = local_preload('{}-deltas'.format(key), make_deltas, key, dirname, RowParser)
+    logger.info(deltas)
 
     # 1. Split on chunks with gaps no longer than sampling;
     # 2. Iterate over datashifts 0 <= j < sampling;
@@ -93,10 +93,10 @@ def sample(key, dirname, RowParser, sampling):
     # 4. Exclude multiples of matched samplings;
     # 5. Store (t_start, t_end, sampling) taking in acount sampling shift j;
 
-    print('{}: Total length of ut'.format(len(ut)))
+    logger.info('{}: Total length of ut'.format(len(ut)))
     min_sequence_duration = 250 * sqrt(sampling)
     working_samplings = []
-    print('{}: sampling to check'.format(sampling))
+    logger.info('{}: sampling to check'.format(sampling))
     starts_at = 0
     for idx in range(len(deltas)):
         if deltas[idx] > sampling and ut[idx] - ut[starts_at] > min_sequence_duration:
@@ -106,9 +106,9 @@ def sample(key, dirname, RowParser, sampling):
                 points = verify_sampling(deltas[starts_at + shift:idx], sampling)
                 if points is not None and points > 0:
                     if not printed:
-                        print('\t{} - {}'.format(ut[starts_at], ut[idx]))
+                        logger.info('\t{} - {}'.format(ut[starts_at], ut[idx]))
                         printed = True
-                    print('\t\t+{} / {}: shift / sampling'.format(shift, sampling))
+                    logger.info('\t\t+{} / {}: shift / sampling'.format(shift, sampling))
                     working_samplings.append({
                         'indexes': (starts_at + shift, idx),
                         'length': idx - starts_at - shift + 1,

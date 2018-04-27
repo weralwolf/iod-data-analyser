@@ -1,16 +1,18 @@
-from matplotlib import use as setRenderingBackend  # isort:skip noqua:E402
-setRenderingBackend('TkAgg')  # isort:skip
+from matplotlib import use as setRenderingBackend  # isort:skip noqa:E402
+setRenderingBackend('Agg')  # isort:skip
 
-from os.path import join, basename  # noqua:E402
-from datetime import datetime
+from os.path import join, basename  # noqa:E402
+from datetime import datetime  # noqa:E402
 
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
+import numpy as np  # noqa:E402
+import matplotlib.pyplot as plt  # noqa:E402
+from mpl_toolkits.basemap import Basemap  # noqa:E402
 
-from ionospheredata.utils import list_datafiles
-from ionospheredata.parser import NACSRow, WATSRow, FileParser
-from ionospheredata.settings import TRACKS_DIR, ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR
+from ionospheredata.utils import list_datafiles  # noqa:E402
+from ionospheredata.parser import NACSRow, WATSRow, FileParser  # noqa:E402
+from ionospheredata.settings import TRACKS_DIR, ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR  # noqa:E402
+
+from .logger import logger  # noqa:E402
 
 
 def chunkup(RowParser, filename):
@@ -28,7 +30,7 @@ def chunkup(RowParser, filename):
             sidx = idx
 
     chunks.append([list(lat[sidx:]), list(lon[sidx:]), list(ut[sidx:])])
-    print('\t\t{} :points // {}: chunks at {}'.format(len(ut), len(chunks), basename(filename)))
+    logger.info('\t\t{} :points // {}: chunks at {}'.format(len(ut), len(chunks), basename(filename)))
     return chunks
 
 
@@ -37,6 +39,7 @@ def date_signature(ut_start, ut_end):
 
 
 def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):
+    # Used to draw polar cups: https://github.com/matplotlib/basemap/issues/350
     poles_save_to = None if destination_dir is None else join(destination_dir, '{}-{}-poles.png'.format(year, day))
     mercat_save_to = None if destination_dir is None else join(destination_dir, '{}-{}-mercator.png'.format(year, day))
     track_colors = [
@@ -67,7 +70,6 @@ def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):
     npole_map.drawparallels(np.arange(-90., 120., 15.), labels=[1, 0, 0, 0], linewidth=0.1)
     npole_map.drawmeridians(np.arange(0., 420., 30.), labels=[1, 0, 1, 1], linewidth=0.1)
     npole_map.drawcoastlines(linewidth=0.2)
-    # npole_map.drawcountries()
     npole_map.drawmapboundary(fill_color=None)  # fill_color=water_color)
     npole_map.fillcontinents(color=land_color, lake_color=water_color, alpha=0.3)
     nlegend = []
@@ -93,7 +95,6 @@ def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):
     spole_map.drawparallels(np.arange(-90., 120., 15.), labels=[1, 0, 0, 0], linewidth=0.1)
     spole_map.drawmeridians(np.arange(0., 420., 30.), labels=[1, 0, 1, 1], linewidth=0.1)
     spole_map.drawcoastlines(linewidth=0.2)
-    # spole_map.drawcountries()
     spole_map.drawmapboundary(fill_color=None)  # fill_color=water_color)
     spole_map.fillcontinents(color=land_color, lake_color=water_color, alpha=0.3)
     slegend = []
@@ -119,11 +120,9 @@ def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):
     fig = plt.figure(figsize=(12, 10), dpi=75)
     mercator_map = Basemap(
         llcrnrlon=-180., llcrnrlat=-75., urcrnrlon=180., urcrnrlat=85.,
-        # llcrnrlon=90., llcrnrlat=-75., urcrnrlon=105., urcrnrlat=65.,
         projection='merc'
     )
     mercator_map.drawcoastlines(linewidth=0.2)
-    # mercator_map.drawcountries()
     mercator_map.drawmapboundary(fill_color=None)  # fill_color=water_color)
     mercator_map.fillcontinents(color=land_color, lake_color=water_color, alpha=0.3)
     mercator_map.drawparallels(np.arange(-75, 85, 30), labels=[1, 0, 0, 0], linewidth=0.1)
@@ -151,10 +150,10 @@ def draw_chunks(year, day, nacs_chunks, wats_chunks, destination_dir=None):
 
 
 def draw_tracks(destination_dir=None):
-    nacs_ignores = [join(DE2SOURCE_NACS_DIR, fname.strip()) for fname in open(join(ARTIFACTS_DIR, 'NACS.ignore.txt'), 'r').readlines()]
+    nacs_ignores = [join(DE2SOURCE_NACS_DIR, fname.strip()) for fname in open(join(ARTIFACTS_DIR, 'nacs.ignore.txt'), 'r').readlines()]
     nacs_goodfiles = [fname for fname in list_datafiles(DE2SOURCE_NACS_DIR) if fname not in nacs_ignores]
 
-    wats_ignores = [join(DE2SOURCE_WATS_DIR, fname.strip()) for fname in open(join(ARTIFACTS_DIR, 'WATS.ignore.txt'), 'r').readlines()]
+    wats_ignores = [join(DE2SOURCE_WATS_DIR, fname.strip()) for fname in open(join(ARTIFACTS_DIR, 'wats.ignore.txt'), 'r').readlines()]
     wats_goodfiles = [fname for fname in list_datafiles(DE2SOURCE_WATS_DIR) if fname not in wats_ignores]
 
     files_by_days = {}
@@ -177,19 +176,20 @@ def draw_tracks(destination_dir=None):
         files_by_days[year_day]['wats'].append(filename)
 
     for yearday in sorted(files_by_days.keys()):
-        print('{}: Year/Day'.format(yearday))
-        print('\t{}: Number of files'.format(len(files_by_days[yearday])))
+        logger.info('{}: Year/Day'.format(yearday))
+        logger.info('\t{}: Number of files'.format(len(files_by_days[yearday])))
         nacs_chunks = sum([chunkup(NACSRow, filename) for filename in files_by_days[yearday]['nacs']], [])
         wats_chunks = sum([chunkup(WATSRow, filename) for filename in files_by_days[yearday]['wats']], [])
-        print('\t{}: Total NACS chunks'.format(len(nacs_chunks)))
-        print('\t{}: Total WATS chunks'.format(len(wats_chunks)))
+        logger.info('\t{}: Total NACS chunks'.format(len(nacs_chunks)))
+        logger.info('\t{}: Total WATS chunks'.format(len(wats_chunks)))
         year_value = yearday[:4]
         day_value = yearday[4:]
         draw_chunks(year_value, day_value, nacs_chunks, wats_chunks, destination_dir)
 
 
-if __name__ == '__main__':
+def main():
     draw_tracks(TRACKS_DIR)
 
-# User to draw polar cups: https://github.com/matplotlib/basemap/issues/350
-# flake8: noqa
+
+if __name__ == '__main__':
+    main()

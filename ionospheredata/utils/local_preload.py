@@ -23,5 +23,7 @@ def local_preload(name, caller, *args, cache_dir=CACHE_DIR, force_reload=False, 
             # print('{} used to load {} objects'.format(idx, name))
             res = pickle.load(datafile)
             return res
+    except EOFError:
+        local_preload(name, caller, *args, cache_dir=cache_dir, force_reload=True, **kwargs)
     except IOError:
         return calculate()

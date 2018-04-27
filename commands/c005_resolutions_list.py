@@ -1,5 +1,5 @@
 from matplotlib import use as setRenderingBackend  # isort:skip noqa:E402
-setRenderingBackend('TkAgg')  # isort:skip
+setRenderingBackend('Agg')  # isort:skip
 
 from os import listdir  # noqa:E402
 from json import load as load_json  # noqa:E402
@@ -74,7 +74,8 @@ def draw_statistics():
     ax.plot(samp_wats, res_wats, '.')
     ax.legend(['NACS min sampling', 'WATS min sampling'])
     ax.set(xlabel='sampling (s)', ylabel='resolution', title='Min resolution under fixes samplings in DE2 data')
-    plt.show()
+    plt.savefig(join(ARTIFACTS_DIR, 'c5.min-resolution.png'), dpi=300, papertype='a0', orientation='landscape')
+    plt.clf()
 
     fig, ax = plt.subplots()
     ax.plot(samp_nacs, duration_nacs_avg, '.')
@@ -82,7 +83,8 @@ def draw_statistics():
     ax.plot(samp_nacs, [250 * sqrt(x) for x in samp_nacs], linewidth=0.1)
     ax.legend(['NACS avg duration', 'WATS avg duration', 'Minimal considered duration'])
     ax.set(xlabel='sampling (s)', ylabel='duration (s)', title='Avg duration under fixes samplings in DE2 data')
-    plt.show()
+    plt.savefig(join(ARTIFACTS_DIR, 'c5.avg-duration.png'), dpi=300, papertype='a0', orientation='landscape')
+    plt.clf()
 
     fig, ax = plt.subplots()
     ax.plot(samp_nacs, duration_nacs_min, '.')
@@ -91,7 +93,8 @@ def draw_statistics():
     ax.plot(samp_nacs, [250 * sqrt(x) for x in samp_nacs], linewidth=0.1)
     ax.legend(['NACS min duration', 'NACS avg duration', 'NACS max duration', 'Minimal considered duration'])
     ax.set(xlabel='sampling (s)', ylabel='duration (s)', title='Min / avg / max continous data duration under fixes samplings in DE2 NACS data')
-    plt.show()
+    plt.savefig(join(ARTIFACTS_DIR, 'c5.nacs-duration.png'), dpi=300, papertype='a0', orientation='landscape')
+    plt.clf()
 
     fig, ax = plt.subplots()
     ax.plot(samp_wats, duration_wats_min, '.')
@@ -100,7 +103,8 @@ def draw_statistics():
     ax.plot(samp_nacs, [250 * sqrt(x) for x in samp_nacs], linewidth=0.1)
     ax.legend(['WATS min duration', 'WATS avg duration', 'WATS max duration', 'Minimal considered duration'])
     ax.set(xlabel='sampling (s)', ylabel='duration (s)', title='Min / avg / max continous data duration under fixes samplings in DE2 WATS data')
-    plt.show()
+    plt.savefig(join(ARTIFACTS_DIR, 'c5.wats-duration.png'), dpi=300, papertype='a0', orientation='landscape')
+    plt.clf()
 
 
 def calculate_distributions(device_key, unique=False):
@@ -126,18 +130,20 @@ def draw_distributions():
     plt.title('NACS durations')
     sns.jointplot(x=array(nacs_sampling), y=array(nacs_resolutions), kind='kde', linewidth=2)
     plt.title('NACS resolutions')
-    plt.show()
+    plt.savefig(join(ARTIFACTS_DIR, 'c5.nacs-resolution-duration.png'), dpi=300, papertype='a0', orientation='landscape')
+    plt.clf()
 
     wats_sampling, wats_resolutions, wats_durations = calculate_distributions('wats', unique=True)
     sns.jointplot(x=array(wats_sampling), y=array(wats_durations), kind='kde', linewidth=2)
     plt.title('WATS durations')
     sns.jointplot(x=array(wats_sampling), y=array(wats_resolutions), kind='kde', linewidth=2)
     plt.title('WATS resolutions')
-    plt.show()
+    plt.savefig(join(ARTIFACTS_DIR, 'c5.wats-resolution-duration.png'), dpi=300, papertype='a0', orientation='landscape')
+    plt.clf()
 
 
 def main():
-    # draw_distributions()
+    draw_distributions()
     draw_statistics()
 
 

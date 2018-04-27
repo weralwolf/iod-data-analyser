@@ -1,21 +1,17 @@
 FROM weralwolf/de2-data:latest AS preprocessor
 
 # Installing Basemap
-ENV GEOS_DIR="/usr/local"
 RUN pip install --upgrade pip && \
     pip install pyproj numpy && \
-    mkdir build && \
-    cd build/ && \
+    apt-get update && \
+    apt-get install -y libgeos-dev && \
+    apt-get autoclean && \
     wget https://github.com/matplotlib/basemap/archive/v1.1.0.tar.gz && \
     tar -xzvf v1.1.0.tar.gz && \
-    cd basemap-1.1.0/geos-3.3.3/ && \
-    ./configure --prefix=$GEOS_DIR && \
-    make && \
-    make install && \
-    cd .. && \
+    cd basemap-1.1.0/ && \
     python setup.py install && \
-    cd ../.. && \
-    rm -rf build/
+    cd ../ && \
+    rm -rf basemap-1.1.0/
 
 # Installing project dependencies
 RUN mkdir -p /processing/cache && \
@@ -38,5 +34,5 @@ RUN export PATH=/usr/local/bin:$PATH && \
     pipenv install --system
 
 COPY . /usr/app
-# ENTRYPOINT [""]
+
 CMD ["python", "./manage.py", "exec", "all"]

@@ -5,6 +5,8 @@ from ionospheredata.utils import local_preload, list_datafiles
 from ionospheredata.parser import NACSRow, WATSRow, FileParser
 from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR
 
+from .logger import logger
+
 
 def read_badfileslist(basedir, filename):
     return [join(basedir, badfilename.strip()) for badfilename in open(filename).readlines()]
@@ -29,9 +31,9 @@ def find_duplicates(filenames):
     for fhash, fnames in hashes.items():
         if len(fnames) < 2:
             continue
-        print('\n\t{}'.format(fhash))
+        logger.info('\n\t{}'.format(fhash))
         for fname in fnames:
-            print('\t\t{}'.format(basename(fname)))
+            logger.info('\t\t{}'.format(basename(fname)))
 
     return {ec[0] for ec in hashes.values() if len(ec) > 1}
 
@@ -44,7 +46,7 @@ def find_intersections(filenames, RowParser):
         cdata = local_preload(filenames[idx], FileParser, RowParser, filenames[idx]).get('ut', transposed=True)[0]
         if pdata[-1] > cdata[0]:
             intersected.append([filenames[idx - 1], filenames[idx]])
-            # print('{} & {}\n\t{} > {}'.format(basename(filenames[idx - 1]), basename(filenames[idx]), pdata[-1], cdata[0]))
+            # logger.info('{} & {}\n\t{} > {}'.format(basename(filenames[idx - 1]), basename(filenames[idx]), pdata[-1], cdata[0]))
 
     return set(sum(intersected, []))
 
@@ -55,39 +57,39 @@ def filtration(key, basedir, RowParser):
         join(ARTIFACTS_DIR, '{}.notmonotone.txt'.format(key))
     )
     datafiles = goodfiles(basedir, badfiles)
-    print('key: {}'.format(key))
-    print('\t{}: total number of good datafiles'.format(len(datafiles)))
+    logger.info('key: {}'.format(key))
+    logger.info('\t{}: total number of good datafiles'.format(len(datafiles)))
     duplicates = find_duplicates(datafiles)
     filtered_datafiles = list(set(datafiles).difference(duplicates))
-    print('\t{}: total number of exclusive datafiles'.format(len(filtered_datafiles)))
+    logger.info('\t{}: total number of exclusive datafiles'.format(len(filtered_datafiles)))
     total_intersections_list = []
     iteration_number = 0
     while True:
         intersections = find_intersections(filtered_datafiles, RowParser)
-        print('\t{} iteration. Intersection search'.format(iteration_number))
+        logger.info('\t{} iteration. Intersection search'.format(iteration_number))
         iteration_number += 1
-        print('\t\t{} files are intersecting'.format(len(intersections)))
+        logger.info('\t\t{} files are intersecting'.format(len(intersections)))
         if len(intersections) == 0:
             break
         total_intersections_list += list(intersections)
         filtered_datafiles = list(set(filtered_datafiles).difference(intersections))
 
-    print('{} files left after filtering'.format(len(filtered_datafiles)))
+    logger.info('{} files left after filtering'.format(len(filtered_datafiles)))
     total_datapoints = sum([
         len(local_preload(filename, FileParser, RowParser, filename).get('ut', transposed=True)[0])
         for filename in filtered_datafiles
     ])
-    print('{} datapoints left'.format(total_datapoints))
-    print('\nDuplicated files:')
+    logger.info('{} datapoints left'.format(total_datapoints))
+    logger.info('\nDuplicated files:')
     for fname in duplicates:
-        print('\t{}'.format(basename(fname)))
+        logger.info('\t{}'.format(basename(fname)))
 
     with open(join(ARTIFACTS_DIR, '{}.duplicates.txt'.format(key)), 'w') as datafile:
         datafile.write('\n'.join([basename(filename) for filename in sorted(duplicates)]))
 
-    print('\nIntersected files:')
+    logger.info('\nIntersected files:')
     for fname in total_intersections_list:
-        print('\t{}'.format(basename(fname)))
+        logger.info('\t{}'.format(basename(fname)))
 
     with open(join(ARTIFACTS_DIR, '{}.intersections.txt'.format(key)), 'w') as datafile:
         datafile.write('\n'.join([basename(filename) for filename in sorted(intersections)]))
