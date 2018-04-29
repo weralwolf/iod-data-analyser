@@ -8,6 +8,14 @@ from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE
 from .logger import logger
 
 
+"""
+Task.
+Identify files where UT records overlapping between files. For simplicity both files are removed,
+except cases when content of both files exactly identical. In case of identical files only one
+is going to be trashed.
+"""
+
+
 def read_badfileslist(basedir, filename):
     return [join(basedir, badfilename.strip()) for badfilename in open(filename).readlines()]
 

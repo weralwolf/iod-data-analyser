@@ -11,6 +11,12 @@ from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE
 from .logger import logger
 
 
+"""
+Task.
+Identify continous sections of data in fixed sampling in range [2s, ~200s].
+"""
+
+
 def round(x):
     return ceil(x) if x - floor(x) > 0.5 else floor(x)
 

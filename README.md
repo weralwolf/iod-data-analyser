@@ -173,3 +173,5 @@ Edit `<virtualend path>/lib/python3.6/site-packages/mpl_toolkits/basemap/__init_
 12. [A Note on Trend and Seasonality Estimation for Unevenly Spaced Time Series](http://eckner.com/papers/Trend%20and%20Seasonality%20Estimation%20for%20Unevenly%20Spaced%20Time%20Series.pdf)
 13. [Andreas Eckner research page. Unevenly spaced time series publications](http://www.eckner.com/research.html)
 14. [Repeat in strings](http://www.cs.ucr.edu/~stelo/cpm/cpm14/00_Crochemore.pdf)
+15. [Statistical Learning: Algorithmic and Nonparametric Approaches](https://rafalab.github.io/pages/649/)
+16. [fminunc - Coursera ML minimisation function python impl.](https://stackoverflow.com/a/21952908/1367936)

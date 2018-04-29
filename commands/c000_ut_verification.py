@@ -7,6 +7,15 @@ from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE
 from .logger import logger
 
 
+"""
+Task.
+Identify "good" data files as those we don't need to fix before usage. From investigation it is clear that
+there's a two types of problems each file can have inside:
+1. UT jumps: when ut behaves not monotonically;
+2. UT duplicates: when ut records have duplicates next to them;
+"""
+
+
 def check_ut_monotone(filename, RowParser):
     filedata = local_preload(filename, FileParser, RowParser, filename)
     uts = filedata.get('ut_of_day', transposed=True)[0]
