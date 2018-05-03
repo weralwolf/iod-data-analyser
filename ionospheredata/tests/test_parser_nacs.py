@@ -1,14 +1,14 @@
 from os.path import join, abspath, dirname
 from unittest import TestCase
 
-from ionospheredata.parser import NACSRow, FileParser
+from ionospheredata.parser import FileParser, SourceNACSRow
 
 TESTDATAPATH = abspath(join(dirname(__file__), 'test_data'))
 
 
 class TestParserNASC(TestCase):
     def test_simple(self):
-        parser = FileParser(NACSRow, join(TESTDATAPATH, '1981361T132320_0_DE2_NACS_1S_V01.ASC'))
+        parser = FileParser(SourceNACSRow, join(TESTDATAPATH, '1981361T132320_0_DE2_NACS_1S_V01.ASC'))
 
         utsod = parser.get('ut_of_day')
         self.assertEqual(utsod.shape, (2, 1))

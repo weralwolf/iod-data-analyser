@@ -1,14 +1,14 @@
 from os.path import join, abspath, dirname
 from unittest import TestCase
 
-from ionospheredata.parser import WATSRow, FileParser
+from ionospheredata.parser import FileParser, SourceWATSRow
 
 TESTDATAPATH = abspath(join(dirname(__file__), 'test_data'))
 
 
 class TestParserWATS(TestCase):
     def test_simple(self):
-        parser = FileParser(WATSRow, join(TESTDATAPATH, '1981220_de2_wats_2s_v01.asc'))
+        parser = FileParser(SourceWATSRow, join(TESTDATAPATH, '1981220_de2_wats_2s_v01.asc'))
 
         utsod = parser.get('ut_of_day')
         self.assertEqual(utsod.shape, (2, 1))

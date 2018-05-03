@@ -2,7 +2,7 @@ import hashlib
 from os.path import join, basename
 
 from ionospheredata.utils import local_preload, list_datafiles
-from ionospheredata.parser import NACSRow, WATSRow, FileParser
+from ionospheredata.parser import FileParser, SourceNACSRow, SourceWATSRow
 from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR
 
 from .logger import logger
@@ -110,8 +110,8 @@ def filtration(key, basedir, RowParser):
 
 
 def main():
-    filtration('nacs', DE2SOURCE_NACS_DIR, NACSRow)
-    filtration('wats', DE2SOURCE_WATS_DIR, WATSRow)
+    filtration('nacs', DE2SOURCE_NACS_DIR, SourceNACSRow)
+    filtration('wats', DE2SOURCE_WATS_DIR, SourceWATSRow)
 
 
 if __name__ == '__main__':

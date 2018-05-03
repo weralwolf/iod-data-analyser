@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt  # noqa:E402
 from mpl_toolkits.basemap import Basemap  # noqa:E402
 
 from ionospheredata.utils import list_datafiles  # noqa:E402
-from ionospheredata.parser import NACSRow, WATSRow, FileParser  # noqa:E402
+from ionospheredata.parser import FileParser, SourceNACSRow, SourceWATSRow  # noqa:E402
 from ionospheredata.settings import TRACKS_DIR, ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR  # noqa:E402
 
 from .logger import logger  # noqa:E402
@@ -178,8 +178,8 @@ def draw_tracks(destination_dir=None):
     for yearday in sorted(files_by_days.keys()):
         logger.info('{}: Year/Day'.format(yearday))
         logger.info('\t{}: Number of files'.format(len(files_by_days[yearday])))
-        nacs_chunks = sum([chunkup(NACSRow, filename) for filename in files_by_days[yearday]['nacs']], [])
-        wats_chunks = sum([chunkup(WATSRow, filename) for filename in files_by_days[yearday]['wats']], [])
+        nacs_chunks = sum([chunkup(SourceNACSRow, filename) for filename in files_by_days[yearday]['nacs']], [])
+        wats_chunks = sum([chunkup(SourceWATSRow, filename) for filename in files_by_days[yearday]['wats']], [])
         logger.info('\t{}: Total NACS chunks'.format(len(nacs_chunks)))
         logger.info('\t{}: Total WATS chunks'.format(len(wats_chunks)))
         year_value = yearday[:4]

@@ -20,10 +20,6 @@ class FileParser:
             lines = datafile.readlines()[self.row.drop_lines:]
             self._data = array([self.row.parse(*line) for line in slice_by(lines, self.row.lines)])
 
-    def _reflect(self, filename):
-        with open(filename, 'w') as datafile:
-            datafile.writelines([self._RowParser.stringify(row) for row in self._data])
-
     def get(self, *params, transposed=False):
         idxs = [self.names.index(param) for param in params]
         data = None

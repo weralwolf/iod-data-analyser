@@ -5,12 +5,12 @@ from matplotlib import pyplot as plt
 
 from iod.a000_config import NFFT, DE2_NACS_DIR, DE2_WATS_DIR
 from ionospheredata.method import break_points, nyquist_theorem, gravitation_wave
-from ionospheredata.parser import NACSRow, WATSRow, FileParser
+from ionospheredata.parser import FileParser, SourceNACSRow, SourceWATSRow
 
 
 def main():
     nacs_datafile = '1982327T164000_0_DE2_NACS_1S_V01.ASC'
-    nacs_data = FileParser(NACSRow, join(DE2_NACS_DIR, nacs_datafile))
+    nacs_data = FileParser(SourceNACSRow, join(DE2_NACS_DIR, nacs_datafile))
 
     # Separate parameters to different dataset
     ut_nacs = round(nacs_data.get('ut', transposed=True)[0] / 1000.)  # `s`
@@ -86,7 +86,7 @@ def main():
 
     # WATS
     wats_datafile = '1982327_de2_wats_2s_v01.asc'
-    wats_data = FileParser(WATSRow, join(DE2_WATS_DIR, wats_datafile))
+    wats_data = FileParser(SourceWATSRow, join(DE2_WATS_DIR, wats_datafile))
 
     mode = wats_data.get('mode', transposed=True)[0]
     vmode = array(list(map(lambda m: m == 5 or m == 6, mode)))

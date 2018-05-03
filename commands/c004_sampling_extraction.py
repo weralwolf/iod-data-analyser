@@ -1,11 +1,11 @@
 import json
-from math import ceil, sqrt, floor
+from math import sqrt
 from os.path import join, exists
 
 from numpy import array, concatenate
 
-from ionospheredata.utils import local_preload
-from ionospheredata.parser import NACSRow, WATSRow, FileParser
+from ionospheredata.utils import round, local_preload
+from ionospheredata.parser import FileParser, SourceNACSRow, SourceWATSRow
 from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR
 
 from .logger import logger
@@ -15,10 +15,6 @@ from .logger import logger
 Task.
 Identify continous sections of data in fixed sampling in range [2s, ~200s].
 """
-
-
-def round(x):
-    return ceil(x) if x - floor(x) > 0.5 else floor(x)
 
 
 def chunkup(data):
@@ -146,8 +142,8 @@ def chunkup_samplings(key, dirname, RowParser):
 
 
 def main():
-    chunkup_samplings('nacs', DE2SOURCE_NACS_DIR, NACSRow)
-    chunkup_samplings('wats', DE2SOURCE_WATS_DIR, WATSRow)
+    chunkup_samplings('nacs', DE2SOURCE_NACS_DIR, SourceNACSRow)
+    chunkup_samplings('wats', DE2SOURCE_WATS_DIR, SourceWATSRow)
 
 
 if __name__ == '__main__':
