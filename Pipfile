@@ -8,6 +8,7 @@ matplotlib = "==2.1.2"
 numpy = "==1.14.0"
 pyproj = "==1.9.5.1"
 seaborn = "*"
+scipy = "*"
 
 [dev-packages]
 "flake8" = "*"
@@ -15,6 +16,7 @@ isort = "*"
 "flake8-quotes" = "*"
 ipython = "*"
 colored = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.6.5"

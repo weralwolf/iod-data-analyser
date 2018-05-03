@@ -5,6 +5,8 @@ services:
     restart: always
     volumes:
       - ".:/usr/app"
+      - "./.local/artifacts/:/processing/artifacts/"
+      - "./.local/cache/:/processing/cache/"
     environment:
       ENV: Local
-    command: ./manage.py exec ut_verification
+    command: ./manage.py exec all

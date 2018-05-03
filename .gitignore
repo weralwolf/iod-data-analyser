@@ -95,3 +95,5 @@ iod.sublime-workspace
 _artifacts/*
 .DS_Store
 */.DS_Store
+.local/*
+.pytest_cache/*

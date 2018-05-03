@@ -1,4 +1,5 @@
 _artifacts/*
+.local/*
 .git/*
 .hooks/*
 .gitignore
