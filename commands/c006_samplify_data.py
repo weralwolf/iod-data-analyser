@@ -22,7 +22,7 @@ Since now analysis is provided for NACS solely.
 
 def sampling_segments(sampling):
     logger.error('\tCollecting unique longest sampling chunks for {}s'.format(sampling))
-    segments_file = join(ARTIFACTS_DIR, 'NACS.{:0>4d}s.sampling.by_ut.json'.format(sampling))
+    segments_file = join(ARTIFACTS_DIR, 'samplings', '000_splits', 'nacs.{:0>4d}s.sampling.by_ut.json'.format(sampling))
     all_segments = json.load(open(segments_file))
     unintersecting_longest_segments = []
     for segment in all_segments:  # keep in mind that all segments are sorted by segment.0 (by time)

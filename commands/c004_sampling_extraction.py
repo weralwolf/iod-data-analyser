@@ -66,8 +66,8 @@ def verify_sampling(deltas, sampling):
 
 def artifacts(key, sampling):
     return (
-        join(ARTIFACTS_DIR, '{}.{:0>4d}s.sampling.by_ut.json'.format(key, sampling)),
-        join(ARTIFACTS_DIR, '{}.{:0>4d}s.sampling.by_length.json'.format(key, sampling))
+        join(ARTIFACTS_DIR, 'samplings', '000_splits', '{}.{:0>4d}s.sampling.by_ut.json'.format(key, sampling)),
+        join(ARTIFACTS_DIR, 'samplings', '000_splits', '{}.{:0>4d}s.sampling.by_length.json'.format(key, sampling))
     )
 
 
