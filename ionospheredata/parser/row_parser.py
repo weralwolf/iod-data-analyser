@@ -26,7 +26,7 @@ class RowParser(object):
         data = []
         delayed = {}
         for idx in range(len(seed)):
-            for computer, value_type in seed[idx].values():
+            for name, (computer, value_type) in seed[idx].items():
                 if isinstance(computer, tuple):
                     start, stop = computer
                     data.append(value_type(lines[idx][start:stop].strip()))

@@ -7,29 +7,26 @@ class SampledNACSRow(RowParser):
     seed = [
         OrderedDict([
             ('ut', ((0, 15), float)),
-            ('o_dens', ((15, 29), float)),  # +6, +7
-            ('o_err', ((29, 37), float)),  # +8
-            ('n2_dens', ((37, 51), float)),  # +9
-            ('n2_err', ((51, 59), float)),  # +10
-            ('he_dens', ((59, 73), float)),  # +11
-            ('he_err', ((73, 81), float)),  # +12
-            ('n_dens', ((81, 95), float)),  # +13
-            ('n_err', ((95, 103), float)),  # +14
-            ('ar_dens', ((103, 117), float)),  # +15
-            ('ar_err', ((117, 125), float)),  # +16
-            ('orbit', ((125, 132), int)),  # +17
-            ('alt', ((132, 141), float)),  # +18
-            ('lat', ((141, 150), float)),  # +19
-            ('lon', ((150, 159), float)),  # +20
-            ('lst', ((159, 166), float)),  # +21
-            ('lmt', ((166, 173), float)),  # +22
-            ('l_sh', ((173, 182), float)),  # +23
-            ('inv_lat', ((182, 191), float)),  # +24
-            ('sza', ((191, 199), float)),  # +25
+            ('o_dens', ((15, 30), float)),
+            ('o_err', ((30, 38), float)),
+            ('n2_dens', ((38, 53), float)),
+            ('n2_err', ((53, 61), float)),
+            ('he_dens', ((61, 76), float)),
+            ('he_err', ((76, 84), float)),
+            ('n_dens', ((84, 99), float)),
+            ('n_err', ((99, 107), float)),
+            ('ar_dens', ((108, 122), float)),
+            ('ar_err', ((122, 130), float)),
+            ('orbit', ((130, 137), int)),
+            ('alt', ((137, 146), float)),
+            ('lat', ((146, 155), float)),
+            ('lon', ((155, 164), float)),
+            ('lst', ((164, 171), float)),
+            ('lmt', ((171, 178), float)),
+            ('l_sh', ((178, 187), float)),
+            ('inv_lat', ((187, 196), float)),
+            ('sza', ((196, 204), float)),
         ])
     ]
-    filename = OrderedDict([
-        ('year', ((0, 4), int)),
-        ('day_of_year', ((4, 7), int)),
-    ])
+    filename = OrderedDict([])
     drop_lines = 0

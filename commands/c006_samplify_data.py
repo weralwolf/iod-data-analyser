@@ -1,22 +1,25 @@
-import json
-from os import makedirs
-from os.path import join, basename
-from datetime import datetime
+from matplotlib import use as setRenderingBackend  # isort:skip noqa:E402
+setRenderingBackend('Agg')  # isort:skip
 
-from numpy import concatenate, searchsorted
+import json  # noqa:E402
+from os import makedirs  # noqa:E402
+from os.path import join, basename  # noqa:E402
+from datetime import datetime  # noqa:E402
 
-from ionospheredata.utils import round, local_preload
-from ionospheredata.parser import FileParser, FileWriter, SourceNACSRow, SampledNACSRow
-from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR
+from numpy import concatenate, searchsorted  # noqa:E402
+from matplotlib import pyplot as plt  # noqa:E402
 
-from .logger import logger  # noqa: F401
+from ionospheredata.utils import round, local_preload  # noqa:E402
+from ionospheredata.parser import FileParser, FileWriter, SourceNACSRow, SampledNACSRow  # noqa:E402
+from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR  # noqa:E402
+
+from .logger import logger  # noqa: F401, E402
 
 
 """
 Task.
-Generate files with data per-sampling.
-# next: Obtain trends over concentration parameters of NACS: O, N_2, He, N, Ar.
-Since now analysis is provided for NACS solely.
+Generate files with data per-sampling and identify number of continuous tracks and their total length per sampling.
+Note: Since now analysis is provided for NACS solely.
 """
 
 
@@ -132,9 +135,40 @@ def collect_segments(sampling):
         with open(fname, 'w') as datafile:
             fw.reflect(datafile)
 
+    with open(join(sampling_dir, '000_list.json'), 'w') as segments_list:
+        json.dump(segments, segments_list)
+
 
 def main():
-    for sampling in range(2, 199):
+    samplings = range(2, 199)
+    metrics = []
+    for sampling in samplings:
+        usegments = sampling_segments(sampling)
+        metrics.append((sampling, len(usegments), sum([s['duration'] for s in usegments])))
+
+    x, count, duration = zip(*metrics)
+    ax = plt.subplot(211)
+    ax.set(
+        title='Number of continuous segments per sampling',
+        xlabel='Samplings, (s)',
+        ylabel='Number of tracks'
+    )
+    plt.plot(x, count)
+    plt.grid(True)
+
+    ax = plt.subplot(212)
+    ax.set(
+        title='Total duration of continuous segments per sampling',
+        xlabel='Samplings, (s)',
+        ylabel='Total duration, (s)'
+    )
+    plt.plot(x, duration)
+    plt.grid(True)
+
+    plt.savefig(join(ARTIFACTS_DIR, 'c6.segments_stats.png'), dpi=300, papertype='a0', orientation='landscape')
+    plt.clf()
+
+    for sampling in samplings:
         collect_segments(sampling)
 
 
