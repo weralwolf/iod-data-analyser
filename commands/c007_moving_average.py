@@ -6,7 +6,7 @@ from fnmatch import fnmatch  # noqa: E402
 from os.path import join, basename  # noqa: E402
 from datetime import datetime  # noqa: E402
 
-from numpy import nan, isnan, absolute  # noqa: E402
+from numpy import nan, copy, isnan, absolute  # noqa: E402
 from numpy.fft import rfft, rfftfreq  # noqa: E402
 from matplotlib import pyplot as plt  # noqa: E402
 
@@ -147,15 +147,19 @@ def draw_trend(name, ut, alt, parameter, trend):
 def draw_wave(name, sampling, ut, alt, wave):
     fig = plt.figure()
 
-    wave[isnan(wave)] = 0  # feel up with zeros for sake of rfft
-
     # Drawing wave
+    filler = copy(wave)
+    f_nan = isnan(filler)
+    fn_nan = ~isnan(filler)
+    filler[fn_nan] = nan
+    filler[f_nan] = 0
     ax_ut = fig.add_subplot(211)
     ax_alt = ax_ut.twiny()
     ax_alt.set_xticks(ax_ut.get_xticks())
     ax_alt.set_xticklabels(alt)
     ax_ut.plot(ut, wave)
-    ax_ut.legend([name])
+    ax_ut.plot(ut, filler, color='red')
+    ax_ut.legend([name, 'Absent data'])
     ax_ut.set(
         xlabel='Universal time, (s)',
         ylabel='Density, 1/cm^3',
@@ -166,6 +170,7 @@ def draw_wave(name, sampling, ut, alt, wave):
     ax_ut.set_title('{} wave'.format(data_title(name, ut)), y=1.1)
 
     # Drawing rfft
+    wave[isnan(wave)] = 0  # feel up with zeros for sake of rfft
     ax_ut = fig.add_subplot(212)
     ax_ut.plot(rfftfreq(len(wave), 1. / sampling), absolute(rfft(wave)))
     ax_ut.set(
@@ -186,7 +191,7 @@ def analyze_param(sampling, ut, alt, parameter, name):
 
 def main():
     for sampling in range(2, 199):
-        segments = segments_list(sampling)[:3]
+        segments = segments_list(sampling)
         for segment_file in segments:
             draw_segment(sampling, segment_file)
 
