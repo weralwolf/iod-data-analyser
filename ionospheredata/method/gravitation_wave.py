@@ -3,7 +3,7 @@ from numpy.fft import fft, ifft
 
 from ionospheredata.consts import NFFT, GW_WINDOW_LEN
 
-from .utils import smooth
+from .moving_average import moving_average
 
 
 def gravitation_wave(concentration):
@@ -21,7 +21,7 @@ def gravitation_wave(concentration):
     # extended_concentration = concentration
 
     # trend by moving average
-    trend = concatenate((smooth(concentration, GW_WINDOW_LEN)[:data_len], zero_fill))  # calculate trend for data set
+    trend = concatenate((moving_average(concentration, GW_WINDOW_LEN)[:data_len], zero_fill))  # calculate trend for data set
     # trend = smooth(concentration, GW_WINDOW_LEN)[:l]  # calculate trend for data set
     wave = extended_concentration - trend
 
