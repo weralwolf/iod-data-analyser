@@ -1,5 +1,5 @@
 [flake8]
-exclude = .git, postponed/, .hooks, _tracks, _objects
+exclude = .git, postponed/, .hooks, _tracks, _objects, .local
 max-line-length = 160
 inline-quotes = '
 docstring-quotes = '''

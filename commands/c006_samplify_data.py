@@ -130,6 +130,7 @@ def collect_segments(sampling):
             segments_per_day[day_marker],
             enhanced[-1][0] - enhanced[0][0]
         ))
+        segment['filename'] = basename(fname)
 
         logger.info('\t{} - segment file'.format(basename(fname)))
         with open(fname, 'w') as datafile:
