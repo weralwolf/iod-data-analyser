@@ -33,6 +33,10 @@ index_tpl = """<!DOCTYPE html>
             {processing_description}
         </div>
         <div width="100%" class="samplings-table">
+            <h3>
+                <a  name="samplings-navigation"></a>
+                Samplings quick access
+            </h3>
             <div>{sampling_links}</div>
             <table class="table table-sm table-hover">
                 {processing_table}
@@ -170,16 +174,23 @@ def main():
     table_data = ''
     general_header = """<tr>
     <th>Details</th>
+    <th scope="col">#</th>
     <th scope="col">Data</th>
     <th scope="col">Start</th>
     <th scope="col">End</th>
-    <th scope="col">Duration</th>
+    <th scope="col">Duration, (s)</th>
     <th scope="col">N</th>
     </tr>"""
     sampling_links = []
     for sampling in range(2, 199):
         table_data += """<thead class="thead-dark">
-        <tr><th scope="col" colspan="6"><h3 id="#sampling-{sampling}">Segments for sampling {sampling} seconds</h3></th></tr>
+        <tr><th scope="col" colspan="7">
+        <h3>
+            <a name="sampling-{sampling}"></a>
+            <a href="#samplings-navigation"><i class="fas fa-arrow-up"></i></a>
+            Segments for sampling {sampling} seconds
+        </h3>
+        </th></tr>
         {general_header}
         </thead>""".format(
             sampling=sampling,
@@ -190,7 +201,7 @@ def main():
         segments_data = sorted(json.load(open(join(sampling_dir, '000_list.json'))), key=lambda x: x['segment'][0])
         table_data += '<tbody>'
 
-        for segment in segments_data:
+        for ne, segment in enumerate(segments_data):
             datafile_name = segment['filename'][:-3]
             page_params = dict(
                 ar_trend=datafile_name + 'ar density.trend.png',
@@ -217,10 +228,13 @@ def main():
                 datafile=datafile_name,
             )
             table_data += """<tr>
-            <th><a href="{report_page_name}"><i class="fas fa-camera"></i></a></th>
-            <th><a href="../samplings/{sampling:0>3}/{datafile}"><i class="fas fa-cart-arrow-down"></i></a></th>
-            <th>{start_date}</th><th>{end_date}</th><th>{duration:.0f}</th><th>{points}</th></tr>""".format(
+            <td scope="row">{global_index}</td>
+            <td><a href="{report_page_name}"><i class="fas fa-camera"></i></a></td>
+            <td><a href="../samplings/{sampling:0>3}/{datafile}"><i class="fas fa-cart-arrow-down"></i></a></td>
+            <td>{start_date}</th><th>{end_date}</th><th>{duration:.0f}</th><th>{points}</td>
+            </tr>""".format(
                 report_page_name=report_page_name,
+                global_index='{:0>3}.{:0>3}'.format(sampling, ne),
                 **page_params,
             )
 
@@ -233,7 +247,7 @@ def main():
         report_index.write(index_tpl.format(
             processing_description=processing_description,
             processing_table=table_data,
-            sampling_links='',
+            sampling_links=', '.join(sampling_links),
         ))
 
 
