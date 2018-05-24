@@ -6,6 +6,9 @@ For more details on instalation PROJ see http://proj4.org/install.html
 pipenv install
 ```
 
+# Method
+https://github.com/Skorokhodik/IonosphereData.git
+
 ## Project init
 ```
 env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.6.5
