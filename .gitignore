@@ -97,3 +97,4 @@ _artifacts/*
 */.DS_Store
 .local/*
 .pytest_cache/*
+README.rst.stk/*

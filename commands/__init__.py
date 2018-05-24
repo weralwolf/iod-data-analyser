@@ -1,10 +1,10 @@
-from re import match
 from os import listdir
+from re import match
 from fnmatch import fnmatch
-from os.path import basename, realpath, dirname
+from os.path import dirname, basename, realpath
 from importlib import import_module
-from .logger import logger  # noqa:F401
 
+from .logger import logger  # noqa:F401
 
 CURRENT_DIR = realpath(dirname(__file__))
 

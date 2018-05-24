@@ -1,6 +1,8 @@
 FROM weralwolf/de2-data:latest AS datalayer
 FROM python:3.6 AS mainland
 
+ENV PYTHONUNBUFFERED=1
+
 # Install tini for process PID 1
 # Reasoning: https://engineeringblog.yelp.com/2016/01/dumb-init-an-init-for-docker.html
 ARG TINI_VERSION='0.18.0'
