@@ -2,28 +2,76 @@ from matplotlib import use as setRenderingBackend  # isort:skip noqa:E402
 setRenderingBackend('Agg')  # isort:skip
 
 from os import listdir  # noqa: E402
+from time import mktime  # noqa: E402
 from fnmatch import fnmatch  # noqa: E402
 from os.path import join, basename  # noqa: E402
-from datetime import datetime  # noqa: E402
+from datetime import date, datetime  # noqa: E402
 
-from numpy import nan, copy, isnan, absolute  # noqa: E402
-from numpy.fft import rfft, rfftfreq  # noqa: E402
+from numpy import nan, copy, array, isnan, zeros, absolute  # noqa: E402
+from numpy.fft import rfft, irfft  # noqa: E402
 from matplotlib import pyplot as plt  # noqa: E402
 
 from ionospheredata.utils import local_preload  # noqa: E402
 from ionospheredata.method import moving_average  # noqa: E402
 from ionospheredata.parser import FileParser, SampledNACSRow  # noqa: E402
-from ionospheredata.settings import ARTIFACTS_DIR  # noqa: E402
+from ionospheredata.settings import (  # noqa: E402
+    ARTIFACTS_DIR, ZEROFILL_LENGTH, GW_MAX_WAVELENGTH, GW_MIN_WAVELENGTH, SATELLITE_VELOCITY
+)
 
 from .logger import logger  # noqa: E402
-
 
 """
 Task.
 Draw segments' concentrations.
 Obtain trends over concentration parameters of NACS: O, N_2, He, N, Ar.
 Note: Since now analysis is provided for NACS solely.
+
+Extension.
+Here we're working only with oxygen component of NACS `o_dens`.
+Select variation:
+1. Identify trend by moving average:
+2. De-trend input signal;
+3. Perform ideal filtration;
+4. Restore signal from spectra;
 """
+
+# # Signal filtering
+
+
+def zerofilled_bounds(original_length):
+    start = (ZEROFILL_LENGTH - original_length) // 2
+    return start, start + original_length
+
+
+def zerofilled_signal(original):
+    zerofilled = zeros(ZEROFILL_LENGTH)
+    original_length = len(original)
+
+    bs, be = zerofilled_bounds(original_length)
+
+    zerofilled[bs:be] = original
+    return zerofilled
+
+
+def zerofilled_ut(ut, sampling):
+    original_length = len(ut)
+    bs, be = zerofilled_bounds(original_length)
+    new_ut = array(list(range(0, ZEROFILL_LENGTH, sampling))) + min(ut)
+    new_ut -= new_ut[bs]
+    new_ut[bs:be] = ut
+    return new_ut
+
+
+def original_signal(signal, original_length):
+    bs, be = zerofilled_bounds(original_length)
+    return signal[bs:be]
+
+
+def lat_ticks(lat, ticks):
+    return [lat[int(tick * (len(lat) - 1))] for tick in ticks]
+
+
+# # Original Code
 
 
 def segments_list(sampling):
@@ -37,26 +85,24 @@ def omit_zeros(arr):
     return arr
 
 
-def draw_bare(ut, alt, params):
+def draw_bare(day, hours, lat, legend, density):
     fig = plt.figure()
     ax_ut = fig.add_subplot(111)
-    ax_alt = ax_ut.twiny()
-    ax_alt.set_xticks(ax_ut.get_xticks())
-    ax_alt.set_xticklabels(alt)
-    legend, densities = zip(*params)
-    for dens in densities:
-        ax_ut.plot(ut, dens)
-    ax_ut.legend(legend)
+    ax_lat = ax_ut.twiny()
+    ax_lat.set_xticks(ax_ut.get_xticks())
+    ax_lat.set_xticklabels(lat_ticks(lat, ax_ut.get_xticks()))
+    ax_ut.plot(hours, density)
+    ax_ut.legend([legend])
     ax_ut.set(
-        xlabel='Universal time, (s)',
+        xlabel='Day {}, (h)'.format(day),
         ylabel='Density, 1/cm^3',
     )
-    ax_alt.set(
-        xlabel='Altitude, (km)'
+    ax_lat.set(
+        xlabel='Latitude, (km)'
     )
     title = 'Density of neutral components {} - {}'.format(
-        datetime.fromtimestamp(ut[0]).strftime('%Y.%j %H:%M:%S'),
-        datetime.fromtimestamp(ut[-1]).strftime('%Y.%j %H:%M:%S')
+        datetime.fromtimestamp(hours[0]).strftime('%Y.%j %H:%M:%S'),
+        datetime.fromtimestamp(hours[-1]).strftime('%Y.%j %H:%M:%S')
     )
     ax_ut.set_title(title, y=1.1)
     return fig
@@ -66,85 +112,120 @@ def draw_segment(sampling, segment_file):
     logger.info('\t{}: processing'.format(basename(segment_file)))
     segment_data = local_preload(segment_file, FileParser, SampledNACSRow, segment_file)
     ut = segment_data.get('ut', transposed=True)[0]
-    alt = segment_data.get('alt', transposed=True)[0]
+    lat = segment_data.get('lat', transposed=True)[0]
     o_dens = omit_zeros(segment_data.get('o_dens', transposed=True)[0])
-    n2_dens = omit_zeros(segment_data.get('n2_dens', transposed=True)[0])
-    he_dens = omit_zeros(segment_data.get('he_dens', transposed=True)[0])
-    n_dens = omit_zeros(segment_data.get('n_dens', transposed=True)[0])
-    ar_dens = omit_zeros(segment_data.get('ar_dens', transposed=True)[0])
 
-    params = [
-        ('O density', o_dens),
-        ('N2 density', n2_dens),
-        ('He density', he_dens),
-        ('N density', n_dens),
-        ('Ar density', ar_dens),
-    ]
+    day, hours = ut_to_hours(ut)
 
-    bare_fig = draw_bare(ut, alt, params)
+    param_name = 'O density'
+    bare_fig = draw_bare(day, hours, lat, param_name, o_dens)
 
     artifact_fname = segment_file[:-3] + 'png'
     logger.debug('\t\t{}: artifact'.format(basename(artifact_fname)))
     bare_fig.savefig(artifact_fname, dpi=300, papertype='a0', orientation='landscape')
     plt.close(bare_fig)
 
-    for name, param in params:
-        fig_avg, fig_wave = analyze_param(sampling, ut, alt, param, name)
+    fig_avg, fig_wave = analyze_param(sampling, day, hours, lat, o_dens, param_name)
 
-        fig_avg_artifact_fname = segment_file[:-3] + name.lower() + '.trend.png'
-        logger.debug('\t\t{}: artifact'.format(basename(fig_avg_artifact_fname)))
-        fig_avg.savefig(fig_avg_artifact_fname, dpi=300, papertype='a0', orientation='landscape')
-        plt.close(fig_avg)
+    fig_avg_artifact_fname = segment_file[:-3] + param_name.lower() + '.trend.png'
+    logger.debug('\t\t{}: artifact'.format(basename(fig_avg_artifact_fname)))
+    fig_avg.savefig(fig_avg_artifact_fname, dpi=300, papertype='a0', orientation='landscape')
+    plt.close(fig_avg)
 
-        fig_wave_artifact_fname = segment_file[:-3] + name.lower() + '.wave.png'
-        logger.debug('\t\t{}: artifact'.format(basename(fig_wave_artifact_fname)))
-        fig_wave.savefig(fig_wave_artifact_fname, dpi=300, papertype='a0', orientation='landscape')
-        plt.close(fig_wave)
+    fig_wave_artifact_fname = segment_file[:-3] + param_name.lower() + '.wave.png'
+    logger.debug('\t\t{}: artifact'.format(basename(fig_wave_artifact_fname)))
+    fig_wave.savefig(fig_wave_artifact_fname, dpi=300, papertype='a0', orientation='landscape')
+    plt.close(fig_wave)
+
+
+def smooth_signal(sampling, parameter, window_len=None):
+    averaging_segment = 5000  # km
+    satellite_velocity = 7.8  # km/s
+    if window_len is None:
+        window_len = int(averaging_segment // sampling // satellite_velocity)
+        window_len += (window_len + 1) % 2  # we make it odd
+    return moving_average(parameter, window_len, split_by_nans=True)
 
 
 def remove_trend(sampling, parameter):
-    averaging_segment = 5000  # km
-    satellite_velocity = 8.6  # km/s
-    window_len = int(averaging_segment // sampling // satellite_velocity)
-    window_len += (window_len + 1) % 2  # we make it odd
-    avg_trend = moving_average(parameter, window_len, split_by_nans=True)
-    return parameter - avg_trend, avg_trend
+    avg_trend = smooth_signal(sampling, parameter)
+    wave = parameter - avg_trend
+
+    signal, fft_trend, noise = ideal_signal_filter(wave)
+
+    return signal, avg_trend, fft_trend, noise
 
 
-def data_title(name, ut):
-    return '{} {} - {}'.format(
-        name,
-        datetime.fromtimestamp(ut[0]).strftime('%Y.%j %H:%M:%S'),
-        datetime.fromtimestamp(ut[-1]).strftime('%Y.%j %H:%M:%S')
-    )
+def ideal_signal_filter(wave):
+    original_length = len(wave)
+    signal = zerofilled_signal(wave)
+    spectra = rfft(signal)
+
+    min_threshold_index = int(round(ZEROFILL_LENGTH * SATELLITE_VELOCITY / GW_MIN_WAVELENGTH))
+    max_threshold_index = int(round(ZEROFILL_LENGTH * SATELLITE_VELOCITY / GW_MAX_WAVELENGTH))
+
+    new_spectra = copy(spectra)
+    new_spectra[:max_threshold_index] = 0
+    new_spectra[min_threshold_index:] = 0
+
+    trend_spectra = copy(spectra)
+    trend_spectra[max_threshold_index:] = 0
+
+    noise_spectra = copy(spectra)
+    noise_spectra[:min_threshold_index] = 0
+
+    new_signal = original_signal(irfft(new_spectra), original_length)
+    trend_filtered = original_signal(irfft(trend_spectra), original_length)
+    noise = original_signal(irfft(noise_spectra), original_length)
+
+    return new_signal, trend_filtered, noise
 
 
-def draw_trend(name, ut, alt, parameter, trend):
+def data_title(name, day, hours):
+    return 'Day {}. {} {:.2f}h - {:.2f}h'.format(day, name, hours[0], hours[-1])
+
+
+def draw_trend(name, day, hours, lat, parameter, avg_trend, fft_trend):
     fig = plt.figure()
-    ax_ut = fig.add_subplot(111)
-    ax_alt = ax_ut.twiny()
-    ax_alt.set_xticks(ax_ut.get_xticks())
-    ax_alt.set_xticklabels(alt)
-    ax_ut.plot(ut, parameter)
-    ax_ut.plot(ut, trend)
-    ax_ut.legend([
+    ax_hours = fig.add_subplot(111)
+    ax_lat = ax_hours.twiny()
+    ax_lat.set_xticks(ax_hours.get_xticks())
+    ax_lat.set_xticklabels(lat_ticks(lat, ax_hours.get_xticks()))
+    ax_hours.plot(hours, parameter)
+    ax_hours.plot(hours, avg_trend)
+    ax_hours.plot(hours, fft_trend)
+    ax_hours.plot(hours, avg_trend + fft_trend)
+    ax_hours.legend([
         name,
-        'Moving average'
+        'MA trend',
+        'FFT trend',
+        'MA+FFT trend',
     ])
-    ax_ut.set(
-        xlabel='Universal time, (s)',
+    ax_hours.set(
+        xlabel='Day {}, (h)'.format(day),
         ylabel='Density, 1/cm^3',
     )
-    ax_alt.set(
-        xlabel='Altitude, (km)'
+    ax_lat.set(
+        xlabel='Latitude, (km)'
     )
 
-    ax_ut.set_title('{} and trend'.format(data_title(name, ut)), y=1.1)
+    ax_hours.set_title('{} and avg_trend'.format(data_title(name, day, hours)), y=1.1)
 
     return fig
 
 
-def draw_wave(name, sampling, ut, alt, wave):
+def ut_to_hours(uts):
+    day_date = datetime.fromtimestamp(uts[0])
+    day = day_date.strftime('%Y/%j')
+    day_ut = mktime(date(
+        int(day_date.strftime('%Y')),
+        int(day_date.strftime('%-m')),
+        int(day_date.strftime('%-d')),
+    ).timetuple())
+    return day, array([(ut - day_ut) / 3600. for ut in uts])
+
+
+def draw_wave(name, day, hours, lat, wave):
     fig = plt.figure()
 
     # Drawing wave
@@ -153,44 +234,43 @@ def draw_wave(name, sampling, ut, alt, wave):
     fn_nan = ~isnan(filler)
     filler[fn_nan] = nan
     filler[f_nan] = 0
-    ax_ut = fig.add_subplot(211)
-    ax_alt = ax_ut.twiny()
-    ax_alt.set_xticks(ax_ut.get_xticks())
-    ax_alt.set_xticklabels(alt)
-    ax_ut.plot(ut, wave)
-    ax_ut.plot(ut, filler, color='red')
-    ax_ut.legend([name, 'Absent data'])
-    ax_ut.set(
-        xlabel='Universal time, (s)',
+    ax_hours = fig.add_subplot(211)
+    ax_lat = ax_hours.twiny()
+    ax_lat.set_xticks(ax_hours.get_xticks())
+    ax_lat.set_xticklabels(lat_ticks(lat, ax_hours.get_xticks()))
+    ax_hours.plot(hours, wave)
+    ax_hours.plot(hours, filler, color='red')
+    ax_hours.legend([name, 'Absent data'])
+    ax_hours.set(
+        xlabel='Day: {}, (h)'.format(day),
         ylabel='Density, 1/cm^3',
     )
-    ax_alt.set(
-        xlabel='Altitude, (km)'
+    ax_lat.set(
+        xlabel='Latitude, (km)'
     )
-    ax_ut.set_title('{} wave'.format(data_title(name, ut)), y=1.1)
+    ax_hours.set_title('{} wave'.format(data_title(name, day, hours)), y=1.1)
 
     # Drawing rfft
     wave[isnan(wave)] = 0  # feel up with zeros for sake of rfft
-    ax_ut = fig.add_subplot(212)
-    ax_ut.plot(rfftfreq(len(wave), 1. / sampling), absolute(rfft(wave)))
-    ax_ut.set(
-        xlabel='Frequency, (Hz)',
-        # ylabel='Density, 1/cm^3',
+    ax_hours = fig.add_subplot(212)
+    ax_hours.plot(array(range(ZEROFILL_LENGTH // 2 + 1)), absolute(rfft(zerofilled_signal(wave))))
+    ax_hours.set(
+        xlabel='Ticks',
     )
 
     return fig
 
 
-def analyze_param(sampling, ut, alt, parameter, name):
-    wave, trend = remove_trend(sampling, parameter)
+def analyze_param(sampling, day, hours, lat, parameter, name):
+    wave, avg_trend, fft_trend, noise = remove_trend(sampling, parameter)
     return (
-        draw_trend(name, ut, alt, parameter, trend),
-        draw_wave(name, sampling, ut, alt, wave),
+        draw_trend(name, day, hours, lat, parameter, avg_trend, fft_trend),
+        draw_wave(name, day, hours, lat, wave),
     )
 
 
 def main():
-    for sampling in range(2, 199):
+    for sampling in range(1, 199):
         segments = segments_list(sampling)
         for segment_file in segments:
             draw_segment(sampling, segment_file)

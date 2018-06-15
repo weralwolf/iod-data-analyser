@@ -5,6 +5,10 @@ def moving_average(x, window_len=11, split_by_nans=False):
     if len(x) == 0:
         return array([])
 
+    window_len = int(window_len)
+    if window_len % 2 == 0:
+        window_len += 1
+
     if split_by_nans:
         chunks = split(x, where(isnan(x))[0])
         result = []

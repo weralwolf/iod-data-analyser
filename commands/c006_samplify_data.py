@@ -141,7 +141,8 @@ def collect_segments(sampling):
 
 
 def main():
-    samplings = range(2, 199)
+    # samplings = range(2, 199)
+    samplings = [1]
     metrics = []
     for sampling in samplings:
         usegments = sampling_segments(sampling)

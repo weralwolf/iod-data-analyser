@@ -5,8 +5,8 @@ from os.path import join, exists
 from numpy import array, concatenate
 
 from ionospheredata.utils import round, local_preload
-from ionospheredata.parser import FileParser, SourceNACSRow, SourceWATSRow
-from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR
+from ionospheredata.parser import FileParser, SourceNACSRow
+from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR
 
 from .logger import logger
 
@@ -135,15 +135,16 @@ def sample(key, dirname, RowParser, sampling):
 
 
 def chunkup_samplings(key, dirname, RowParser):
-    for sampling in range(2, round(1700 / 8.6) + 1):  # No gap longer than 1700km
-        by_ut, by_length = artifacts(key, sampling)
-        if not exists(by_ut) or not exists(by_length):
-            sample(key, dirname, RowParser, sampling)
+    # for sampling in range(2, round(1700 / 8.6) + 1):  # No gap longer than 1700km
+    sampling = 1
+    by_ut, by_length = artifacts(key, sampling)
+    if not exists(by_ut) or not exists(by_length):
+        sample(key, dirname, RowParser, sampling)
 
 
 def main():
     chunkup_samplings('nacs', DE2SOURCE_NACS_DIR, SourceNACSRow)
-    chunkup_samplings('wats', DE2SOURCE_WATS_DIR, SourceWATSRow)
+    # chunkup_samplings('wats', DE2SOURCE_WATS_DIR, SourceWATSRow)
 
 
 if __name__ == '__main__':
