@@ -104,6 +104,8 @@ processing_description = """
             by UT moving averages were computed on continuous pieces];
         </li>
         <li>Subtract averages from data obtaining density oscillations for O, N, N<sub>2</sub>, He, Ar;</li>
+        <li>Apply ideal spectral filtering on [2500 km, 100 km]</li>
+        <li>Extract trend from filtered frequencies, low frequencies space, and high for noise.</li>
     </ol>
 </p>
 <h2>Number of tracks and their total duration</h2>
@@ -145,26 +147,28 @@ page_tpl = """<!DOCTYPE html>
             <img src="../samplings/{sampling:0>3}/{o_trend}" width="100%" />
             <img src="../samplings/{sampling:0>3}/{o_wave}" width="100%" />
         </div>
-        <div>
-            <h3>N density</h3>
-            <img src="../samplings/{sampling:0>3}/{n_trend}" width="100%" />
-            <img src="../samplings/{sampling:0>3}/{n_wave}" width="100%" />
-        </div>
-        <div>
-            <h3>N<sub>2</sub> density</h3>
-            <img src="../samplings/{sampling:0>3}/{n2_trend}" width="100%" />
-            <img src="../samplings/{sampling:0>3}/{n2_wave}" width="100%" />
-        </div>
-        <div>
-            <h3>He density</h3>
-            <img src="../samplings/{sampling:0>3}/{he_trend}" width="100%" />
-            <img src="../samplings/{sampling:0>3}/{he_wave}" width="100%" />
-        </div>
-        <div>
-            <h3>Ar density</h3>
-            <img src="../samplings/{sampling:0>3}/{ar_trend}" width="100%" />
-            <img src="../samplings/{sampling:0>3}/{ar_wave}" width="100%" />
-        </div>
+        <!--
+        # <div>
+        #     <h3>N density</h3>
+        #     <img src="../samplings/{sampling:0>3}/{n_trend}" width="100%" />
+        #     <img src="../samplings/{sampling:0>3}/{n_wave}" width="100%" />
+        # </div>
+        # <div>
+        #     <h3>N<sub>2</sub> density</h3>
+        #     <img src="../samplings/{sampling:0>3}/{n2_trend}" width="100%" />
+        #     <img src="../samplings/{sampling:0>3}/{n2_wave}" width="100%" />
+        # </div>
+        # <div>
+        #     <h3>He density</h3>
+        #     <img src="../samplings/{sampling:0>3}/{he_trend}" width="100%" />
+        #     <img src="../samplings/{sampling:0>3}/{he_wave}" width="100%" />
+        # </div>
+        # <div>
+        #     <h3>Ar density</h3>
+        #     <img src="../samplings/{sampling:0>3}/{ar_trend}" width="100%" />
+        #     <img src="../samplings/{sampling:0>3}/{ar_wave}" width="100%" />
+        # </div>
+        -->
       </div>
     <body>
 </html>"""
@@ -182,7 +186,7 @@ def main():
     <th scope="col">N</th>
     </tr>"""
     sampling_links = []
-    for sampling in range(2, 199):
+    for sampling in range(1, 199):
         table_data += """<thead class="thead-dark">
         <tr><th scope="col" colspan="7">
         <h3>
@@ -202,6 +206,9 @@ def main():
         table_data += '<tbody>'
 
         for ne, segment in enumerate(segments_data):
+            if 'filename' not in segment:
+                continue
+
             datafile_name = segment['filename'][:-3]
             page_params = dict(
                 ar_trend=datafile_name + 'ar density.trend.png',
