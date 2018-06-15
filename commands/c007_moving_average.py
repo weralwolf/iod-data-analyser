@@ -151,18 +151,18 @@ def remove_trend(sampling, parameter):
     avg_trend = smooth_signal(sampling, parameter)
     wave = parameter - avg_trend
 
-    signal, fft_trend, noise = ideal_signal_filter(wave)
+    signal, fft_trend, noise = ideal_signal_filter(wave, sampling)
 
     return signal, avg_trend, fft_trend, noise
 
 
-def ideal_signal_filter(wave):
+def ideal_signal_filter(wave, sampling):
     original_length = len(wave)
     signal = zerofilled_signal(wave)
     spectra = rfft(signal)
 
-    min_threshold_index = int(round(ZEROFILL_LENGTH * SATELLITE_VELOCITY / GW_MIN_WAVELENGTH))
-    max_threshold_index = int(round(ZEROFILL_LENGTH * SATELLITE_VELOCITY / GW_MAX_WAVELENGTH))
+    min_threshold_index = int(round(ZEROFILL_LENGTH * sampling * SATELLITE_VELOCITY / GW_MIN_WAVELENGTH))
+    max_threshold_index = int(round(ZEROFILL_LENGTH * sampling * SATELLITE_VELOCITY / GW_MAX_WAVELENGTH))
 
     new_spectra = copy(spectra)
     new_spectra[:max_threshold_index] = 0

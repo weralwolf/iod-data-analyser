@@ -135,11 +135,10 @@ def sample(key, dirname, RowParser, sampling):
 
 
 def chunkup_samplings(key, dirname, RowParser):
-    # for sampling in range(2, round(1700 / 8.6) + 1):  # No gap longer than 1700km
-    sampling = 1
-    by_ut, by_length = artifacts(key, sampling)
-    if not exists(by_ut) or not exists(by_length):
-        sample(key, dirname, RowParser, sampling)
+    for sampling in range(1, round(1700 / 8.6) + 1):  # No gap longer than 1700km
+        by_ut, by_length = artifacts(key, sampling)
+        if not exists(by_ut) or not exists(by_length):
+            sample(key, dirname, RowParser, sampling)
 
 
 def main():
