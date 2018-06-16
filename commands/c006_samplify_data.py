@@ -70,6 +70,8 @@ def enhance_segment(segment, sampling):
         search_boundaries[1]
     ]
     logger.debug('\t\t\t{:.0f} : {:.0f} - search gate'.format(*segment['segment']))
+    if search_boundaries[1] + 1 not in ut_markers:
+        return None
     logger.debug('\t\t\t{} - {}'.format(
         ut_markers[search_boundaries[0]],
         ut_markers[search_boundaries[1] + 1]
@@ -114,7 +116,7 @@ def collect_segments(sampling):
     makedirs(sampling_dir, exist_ok=True)
     for segment in segments:
         enhanced = enhance_segment(segment, sampling)
-        if len(enhanced) == 0:
+        if enhanced is None or len(enhanced) == 0:
             logger.error(json.dumps(segment, indent=2))
             continue
         fw = FileWriter(SampledNACSRow, enhanced)
@@ -141,8 +143,7 @@ def collect_segments(sampling):
 
 
 def main():
-    # samplings = range(2, 199)
-    samplings = [1]
+    samplings = [1]  # range(1, 199)
     metrics = []
     for sampling in samplings:
         usegments = sampling_segments(sampling)

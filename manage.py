@@ -3,8 +3,6 @@
 from sys import argv, exit
 from commands import find_command, list_commands, execute_command
 
-# from commands.chalk import red, green, yellow, noticeRed, noticeGreen, noticeYellow
-
 
 def execute_selected_command(command_name, *args):
     commands = sorted(list_commands(), key=lambda x: x['index'] or 0)

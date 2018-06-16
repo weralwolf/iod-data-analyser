@@ -1,10 +1,12 @@
 import json
 from math import sqrt
 from os.path import join, exists
+from datetime import date
 
-from numpy import array, concatenate
+import chalk
+from numpy import abs, array, isnan, round, concatenate
 
-from ionospheredata.utils import round, local_preload
+from ionospheredata.utils import local_preload
 from ionospheredata.parser import FileParser, SourceNACSRow
 from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR
 
@@ -14,6 +16,7 @@ from .logger import logger
 """
 Task.
 Identify continous sections of data in fixed sampling in range [2s, ~200s].
+@TODO: Also specify parameters by presence of which identify continuity of a time point.
 """
 
 
@@ -54,10 +57,10 @@ def verify_sampling(deltas, sampling):
     match = 0
     points = 0
     for idx in range(0, len(deltas)):
-        if match == sampling:
+        if abs(match - sampling) <= 0.5:
             points += 1
             match = 0
-        elif match > sampling:
+        elif match - sampling >= 0.5:
             return None
         match += deltas[idx]
     else:
@@ -73,21 +76,26 @@ def artifacts(key, sampling):
 
 def make_deltas(key, dirname, RowParser):
     logger.info('{}. Reading datafiles'.format(key))
-    datafiles = [join(dirname, fname.strip()) for fname in open(join(ARTIFACTS_DIR, '{}.good.txt'.format(key)), 'r').readlines()]
+    datafiles = [
+        join(dirname, fname.strip())
+        for fname in open(join(ARTIFACTS_DIR, '{}.good.txt'.format(key)), 'r').readlines()
+    ]
     ut = concatenate([
         local_preload(fname, FileParser, RowParser, fname).get('ut', transposed=True)[0]
         for fname in sorted(datafiles)
     ], axis=0)
-    deltas = []
+    o_dens = concatenate([
+        local_preload(fname, FileParser, RowParser, fname).get('o_dens', transposed=True)[0]
+        for fname in sorted(datafiles)
+    ], axis=0)
     logger.info('{}. Compute deltas'.format(key))
     logger.info('{}: total keys'.format(len(ut)))
     deltas = (concatenate([ut, array([0])]) - concatenate([array([0]), ut]))[1:]
-    return deltas, ut
+    return deltas, ut, o_dens
 
 
 def sample(key, dirname, RowParser, sampling):
-    deltas, ut = local_preload('{}-deltas'.format(key), make_deltas, key, dirname, RowParser)
-    logger.info(deltas)
+    deltas, ut, o_dens = local_preload('{}-deltas'.format(key), make_deltas, key, dirname, RowParser)
 
     # 1. Split on chunks with gaps no longer than sampling;
     # 2. Iterate over datashifts 0 <= j < sampling;
@@ -100,26 +108,50 @@ def sample(key, dirname, RowParser, sampling):
     working_samplings = []
     logger.info('{}: sampling to check'.format(sampling))
     starts_at = 0
+    continuous = True
     for idx in range(len(deltas)):
-        if deltas[idx] > sampling and ut[idx] - ut[starts_at] > min_sequence_duration:
-            printed = False
-            shift = 0
-            while sum(deltas[starts_at:starts_at + shift]) < sampling:
-                points = verify_sampling(deltas[starts_at + shift:idx], sampling)
-                if points is not None and points > 0:
-                    if not printed:
-                        logger.info('\t{} - {}'.format(ut[starts_at], ut[idx]))
-                        printed = True
-                    logger.info('\t\t+{} / {}: shift / sampling'.format(shift, sampling))
-                    working_samplings.append({
-                        'indexes': (starts_at + shift, idx),
-                        'length': idx - starts_at - shift + 1,
-                        'points': points,
-                        'segment': (ut[starts_at + shift], ut[idx]),
-                        'duration': ut[idx] - ut[starts_at + shift],
-                        'resolution': float(sampling) / points,
-                    })
-                shift += 1
+        continuous = continuous and o_dens[idx] is not None and not isnan(o_dens[idx]) and o_dens[idx] != 0
+
+        if not continuous:
+            starts_at = idx + 1
+            continuous = True
+            continue
+
+        if deltas[idx] - sampling >= 0.5:
+            year = date.fromtimestamp(ut[starts_at]).strftime('%Y / %j')
+            if deltas[idx] > 500.:
+                logger.info(chalk.red('{:0>4d}\t..\t\t\t{:.2f}'.format(sampling, deltas[idx]), bold=True, underline=True))
+            segment_length = ut[idx] - ut[starts_at]
+
+            if segment_length > min_sequence_duration:
+                logger.info(
+                    chalk.green('{:0>4d}\t++[{}]\t{}\t\t{:.2f} > {}'.format(
+                        sampling,
+                        len(working_samplings),
+                        year,
+                        segment_length,
+                        min_sequence_duration
+                    ), bold=True, underline=True)
+                )
+                shift = 0
+                sub_working = []
+                while sum(deltas[starts_at:starts_at + shift]) < segment_length - min_sequence_duration:
+                    points = verify_sampling(deltas[starts_at + shift:idx], sampling)
+                    if points is not None and points > 0:
+                        sub_working.append({
+                            'indexes': (starts_at + shift, idx),
+                            'length': idx - starts_at - shift + 1,
+                            'points': points,
+                            'segment': (ut[starts_at + shift], ut[idx]),
+                            'duration': ut[idx] - ut[starts_at + shift],
+                            'resolution': float(sampling) / points,
+                        })
+                        if (ut[idx] - ut[starts_at + shift]) > 0.9 * segment_length:
+                            break
+                    shift += 1
+
+                if len(sub_working) > 0:
+                    working_samplings.append(sorted(sub_working, key=lambda x: x['duration'])[0])
             starts_at = idx + 1
 
     by_ut, by_length = artifacts(key, sampling)
@@ -135,7 +167,9 @@ def sample(key, dirname, RowParser, sampling):
 
 
 def chunkup_samplings(key, dirname, RowParser):
-    for sampling in range(1, round(1700 / 8.6) + 1):  # No gap longer than 1700km
+    logger.info('{} at {}'.format(key, dirname))
+    for sampling in range(1, 199):
+        logger.info('{} -- sampling'.format(sampling))
         by_ut, by_length = artifacts(key, sampling)
         if not exists(by_ut) or not exists(by_length):
             sample(key, dirname, RowParser, sampling)

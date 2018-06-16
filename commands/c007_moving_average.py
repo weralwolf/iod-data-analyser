@@ -33,6 +33,10 @@ Select variation:
 2. De-trend input signal;
 3. Perform ideal filtration;
 4. Restore signal from spectra;
+
+@TODO: smoother moving average
+@TODO: Better ticks:
+https://stackoverflow.com/questions/12608788/changing-the-tick-frequency-on-x-or-y-axis-in-matplotlib
 """
 
 # # Signal filtering
@@ -67,8 +71,14 @@ def original_signal(signal, original_length):
     return signal[bs:be]
 
 
-def lat_ticks(lat, ticks):
-    return [lat[int(tick * (len(lat) - 1))] for tick in ticks]
+def tick_labels(value, ticks, precision=2.0):
+    value_len = len(value) - 1
+    return [
+        int(
+            value[int(tick * value_len)] * precision
+        ) / precision
+        for tick in ticks
+    ]
 
 
 # # Original Code
@@ -90,7 +100,7 @@ def draw_bare(day, hours, lat, legend, density):
     ax_ut = fig.add_subplot(111)
     ax_lat = ax_ut.twiny()
     ax_lat.set_xticks(ax_ut.get_xticks())
-    ax_lat.set_xticklabels(lat_ticks(lat, ax_ut.get_xticks()))
+    ax_lat.set_xticklabels(tick_labels(lat, ax_ut.get_xticks()))
     ax_ut.plot(hours, density)
     ax_ut.legend([legend])
     ax_ut.set(
@@ -98,7 +108,7 @@ def draw_bare(day, hours, lat, legend, density):
         ylabel='Density, 1/cm^3',
     )
     ax_lat.set(
-        xlabel='Latitude, (km)'
+        xlabel='Latitude, (deg)'
     )
     title = 'Density of neutral components {} - {}'.format(
         datetime.fromtimestamp(hours[0]).strftime('%Y.%j %H:%M:%S'),
@@ -118,12 +128,6 @@ def draw_segment(sampling, segment_file):
     day, hours = ut_to_hours(ut)
 
     param_name = 'O density'
-    bare_fig = draw_bare(day, hours, lat, param_name, o_dens)
-
-    artifact_fname = segment_file[:-3] + 'png'
-    logger.debug('\t\t{}: artifact'.format(basename(artifact_fname)))
-    bare_fig.savefig(artifact_fname, dpi=300, papertype='a0', orientation='landscape')
-    plt.close(bare_fig)
 
     fig_avg, fig_wave = analyze_param(sampling, day, hours, lat, o_dens, param_name)
 
@@ -185,31 +189,56 @@ def data_title(name, day, hours):
     return 'Day {}. {} {:.2f}h - {:.2f}h'.format(day, name, hours[0], hours[-1])
 
 
-def draw_trend(name, day, hours, lat, parameter, avg_trend, fft_trend):
-    fig = plt.figure()
-    ax_hours = fig.add_subplot(111)
-    ax_lat = ax_hours.twiny()
-    ax_lat.set_xticks(ax_hours.get_xticks())
-    ax_lat.set_xticklabels(lat_ticks(lat, ax_hours.get_xticks()))
-    ax_hours.plot(hours, parameter)
-    ax_hours.plot(hours, avg_trend)
-    ax_hours.plot(hours, fft_trend)
-    ax_hours.plot(hours, avg_trend + fft_trend)
-    ax_hours.legend([
+def lat_ticks(lat, precision=2.0):
+    lat_i = [(int(lat_v) // precision) * precision for lat_v in lat]
+    lat_m = list(sorted(list(set(lat_i))))
+    lat_l = len(lat)
+    return [lat_i.index(lat_v) / lat_l for lat_v in lat_m]
+
+
+def hours_ticks(hours):
+    hours_i = [int(hour * 50) / 50. for hour in hours]
+    return list(sorted(list(set(hours_i))))
+
+
+def draw_trend(name, day, hours, lat, parameter, avg_trend, fft_trend, noise):
+    fig, (ax_hours_trend, ax_hours_noise) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [5, 1]})
+
+    lat_t = lat_ticks(lat)
+    hours_m = hours_ticks(hours)
+
+    ax_lat_trend = ax_hours_trend.twiny()
+    ax_lat_trend.grid(True, linestyle=':', linewidth=0.5)
+    ax_lat_trend.set_xticks(lat_t)
+    ax_lat_trend.set_xticklabels(tick_labels(lat, lat_t))
+    plt.setp(ax_lat_trend.xaxis.get_majorticklabels(), rotation=-90)
+    ax_lat_trend.xaxis.set_tick_params(labelsize=4)
+
+    ax_hours_trend.grid(True, linestyle='-')
+    ax_hours_trend.plot(hours, parameter)
+    ax_hours_trend.plot(hours, avg_trend)
+    ax_hours_trend.plot(hours, fft_trend)
+    ax_hours_trend.plot(hours, avg_trend + fft_trend)
+    ax_hours_trend.set_xticks(hours_m)
+    plt.setp(ax_hours_trend.xaxis.get_majorticklabels(), rotation=-30)
+    ax_hours_trend.xaxis.set_tick_params(labelsize=4)
+    ax_hours_trend.legend([
         name,
         'MA trend',
         'FFT trend',
         'MA+FFT trend',
     ])
-    ax_hours.set(
-        xlabel='Day {}, (h)'.format(day),
-        ylabel='Density, 1/cm^3',
-    )
-    ax_lat.set(
-        xlabel='Latitude, (km)'
-    )
+    ax_hours_trend.set_ylabel('Density, 1/cm^3')
+    ax_lat_trend.set_xlabel('Latitude, (deg)')
 
-    ax_hours.set_title('{} and avg_trend'.format(data_title(name, day, hours)), y=1.1)
+    ax_hours_trend.set_title('{} and avg_trend'.format(data_title(name, day, hours)), y=1.12)
+
+    ax_hours_noise.grid(True)
+    ax_hours_noise.plot(hours, noise)
+    ax_hours_noise.set_xticks(hours_m)
+    plt.setp(ax_hours_noise.xaxis.get_majorticklabels(), rotation=-30)
+    ax_hours_noise.xaxis.set_tick_params(labelsize=4)
+    ax_hours_noise.set_xlabel('Day {}, (h)'.format(day))
 
     return fig
 
@@ -225,38 +254,51 @@ def ut_to_hours(uts):
     return day, array([(ut - day_ut) / 3600. for ut in uts])
 
 
-def draw_wave(name, day, hours, lat, wave):
-    fig = plt.figure()
+def draw_wave(name, day, hours, lat, wave, noise):
+    fig, (ax_hours_wave, ax_hours_noise, ax_hours_fft) = plt.subplots(3, 1, gridspec_kw={'height_ratios': [5, 2, 5]})
 
-    # Drawing wave
+    lat_t = lat_ticks(lat)
+    hours_m = hours_ticks(hours)
+
+    ax_hours_wave.grid(True)
+
     filler = copy(wave)
     f_nan = isnan(filler)
     fn_nan = ~isnan(filler)
     filler[fn_nan] = nan
     filler[f_nan] = 0
-    ax_hours = fig.add_subplot(211)
-    ax_lat = ax_hours.twiny()
-    ax_lat.set_xticks(ax_hours.get_xticks())
-    ax_lat.set_xticklabels(lat_ticks(lat, ax_hours.get_xticks()))
-    ax_hours.plot(hours, wave)
-    ax_hours.plot(hours, filler, color='red')
-    ax_hours.legend([name, 'Absent data'])
-    ax_hours.set(
-        xlabel='Day: {}, (h)'.format(day),
+
+    ax_lat_wave = ax_hours_wave.twiny()
+    ax_lat_wave.grid(True, linestyle=':', linewidth=0.5)
+    ax_lat_wave.set_xticks(lat_t)
+    ax_lat_wave.set_xticklabels(tick_labels(lat, lat_t))
+    plt.setp(ax_lat_wave.xaxis.get_majorticklabels(), rotation=-90)
+    ax_lat_wave.xaxis.set_tick_params(labelsize=4)
+    ax_hours_wave.plot(hours, wave)
+    ax_hours_wave.plot(hours, filler, color='red')
+    ax_hours_wave.set_xticks(hours_m)
+    plt.setp(ax_hours_wave.xaxis.get_majorticklabels(), rotation=-30)
+    ax_hours_wave.xaxis.set_tick_params(labelsize=4)
+    ax_hours_wave.legend([name, 'Absent data'])
+    ax_hours_wave.set(
         ylabel='Density, 1/cm^3',
     )
-    ax_lat.set(
-        xlabel='Latitude, (km)'
+    ax_lat_wave.set(
+        xlabel='Latitude, (deg)'
     )
-    ax_hours.set_title('{} wave'.format(data_title(name, day, hours)), y=1.1)
+    ax_hours_wave.set_title('{} wave'.format(data_title(name, day, hours)), y=1.25)
 
-    # Drawing rfft
-    wave[isnan(wave)] = 0  # feel up with zeros for sake of rfft
-    ax_hours = fig.add_subplot(212)
-    ax_hours.plot(array(range(ZEROFILL_LENGTH // 2 + 1)), absolute(rfft(zerofilled_signal(wave))))
-    ax_hours.set(
-        xlabel='Ticks',
+    ax_hours_noise.grid(True)
+    ax_hours_noise.plot(hours, noise)
+    ax_hours_noise.set_xticks(hours_m)
+    plt.setp(ax_hours_noise.xaxis.get_majorticklabels(), rotation=-30)
+    ax_hours_noise.xaxis.set_tick_params(labelsize=4)
+    ax_hours_noise.set(
+        xlabel='Day {}, (h)'.format(day),
     )
+
+    wave[isnan(wave)] = 0  # feel up with zeros for sake of rfft
+    ax_hours_fft.plot(array(range(ZEROFILL_LENGTH // 2 + 1)), absolute(rfft(zerofilled_signal(wave))))
 
     return fig
 
@@ -264,13 +306,13 @@ def draw_wave(name, day, hours, lat, wave):
 def analyze_param(sampling, day, hours, lat, parameter, name):
     wave, avg_trend, fft_trend, noise = remove_trend(sampling, parameter)
     return (
-        draw_trend(name, day, hours, lat, parameter, avg_trend, fft_trend),
-        draw_wave(name, day, hours, lat, wave),
+        draw_trend(name, day, hours, lat, parameter, avg_trend, fft_trend, noise),
+        draw_wave(name, day, hours, lat, wave, noise),
     )
 
 
 def main():
-    for sampling in range(1, 199):
+    for sampling in [1]:  # range(1, 199):
         segments = segments_list(sampling)
         for segment_file in segments:
             draw_segment(sampling, segment_file)

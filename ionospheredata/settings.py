@@ -35,7 +35,7 @@ IS_SILENT = False
 SATELLITE_VELOCITY = 7.8  # km/s
 
 # Atmospheric gravity waves estimated parameters
-GW_MIN_WAVELENGTH = 100  # km
+GW_MIN_WAVELENGTH = 200  # km
 GW_MAX_WAVELENGTH = 2500  # km
 
 # Analysis. Minimum length since we count signal spike of activity to be a perturbation
