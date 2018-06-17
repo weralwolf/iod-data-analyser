@@ -123,13 +123,14 @@ def draw_segment(sampling, segment_file):
     segment_data = local_preload(segment_file, FileParser, SampledNACSRow, segment_file)
     ut = segment_data.get('ut', transposed=True)[0]
     lat = segment_data.get('lat', transposed=True)[0]
+    lon = segment_data.get('lon', transposed=True)[0]
     o_dens = omit_zeros(segment_data.get('o_dens', transposed=True)[0])
 
     day, hours = ut_to_hours(ut)
 
     param_name = 'O density'
 
-    fig_avg, fig_wave = analyze_param(sampling, day, hours, lat, o_dens, param_name)
+    fig_avg, fig_wave = analyze_param(sampling, day, hours, lat, lon, o_dens, param_name)
 
     fig_avg_artifact_fname = segment_file[:-3] + param_name.lower() + '.trend.png'
     logger.debug('\t\t{}: artifact'.format(basename(fig_avg_artifact_fname)))
@@ -189,11 +190,19 @@ def data_title(name, day, hours):
     return 'Day {}. {} {:.2f}h - {:.2f}h'.format(day, name, hours[0], hours[-1])
 
 
-def lat_ticks(lat, precision=2.0):
-    lat_i = [(int(lat_v) // precision) * precision for lat_v in lat]
-    lat_m = list(sorted(list(set(lat_i))))
+def discrete_ticks(lat, precision=5.0):
+    ticks = []
+    labels = []
+    last_tick = None
     lat_l = len(lat)
-    return [lat_i.index(lat_v) / lat_l for lat_v in lat_m]
+    for idx, lat_v in enumerate(lat):
+        tick_value = (lat_v // precision) * precision
+        if tick_value != last_tick:
+            last_tick = tick_value
+            ticks.append(idx / lat_l)
+            labels.append(tick_value)
+
+    return ticks, labels
 
 
 def hours_ticks(hours):
@@ -201,20 +210,36 @@ def hours_ticks(hours):
     return list(sorted(list(set(hours_i))))
 
 
-def draw_trend(name, day, hours, lat, parameter, avg_trend, fft_trend, noise):
+def make_patch_spines_invisible(ax):
+    ax.set_frame_on(True)
+    ax.patch.set_visible(False)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+
+
+def draw_trend(name, day, hours, lat, lon, parameter, avg_trend, fft_trend, noise):
     fig, (ax_hours_trend, ax_hours_noise) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [5, 1]})
 
-    lat_t = lat_ticks(lat)
+    lat_t, lat_l = discrete_ticks(lat)
+    lon_t, lon_l = discrete_ticks(lon, precision=.5)
     hours_m = hours_ticks(hours)
 
+    ax_lon_trend = ax_hours_trend.twiny()
+    ax_lon_trend.grid(True)
+    ax_lon_trend.spines['top'].set_position(('axes', 1.1))
+    make_patch_spines_invisible(ax_lon_trend)
+    ax_lon_trend.spines['top'].set_visible(True)
+    plt.setp(ax_lon_trend.xaxis.get_majorticklabels(), rotation=-90)
+    ax_lon_trend.xaxis.set_tick_params(labelsize=4)
+    ax_lon_trend.set_xticks(lon_t)
+    ax_lon_trend.set_xticklabels(lon_l)
+
     ax_lat_trend = ax_hours_trend.twiny()
-    ax_lat_trend.grid(True, linestyle=':', linewidth=0.5)
     ax_lat_trend.set_xticks(lat_t)
-    ax_lat_trend.set_xticklabels(tick_labels(lat, lat_t))
+    ax_lat_trend.set_xticklabels(lat_l)
     plt.setp(ax_lat_trend.xaxis.get_majorticklabels(), rotation=-90)
     ax_lat_trend.xaxis.set_tick_params(labelsize=4)
 
-    ax_hours_trend.grid(True, linestyle='-')
     ax_hours_trend.plot(hours, parameter)
     ax_hours_trend.plot(hours, avg_trend)
     ax_hours_trend.plot(hours, fft_trend)
@@ -222,16 +247,15 @@ def draw_trend(name, day, hours, lat, parameter, avg_trend, fft_trend, noise):
     ax_hours_trend.set_xticks(hours_m)
     plt.setp(ax_hours_trend.xaxis.get_majorticklabels(), rotation=-30)
     ax_hours_trend.xaxis.set_tick_params(labelsize=4)
-    ax_hours_trend.legend([
-        name,
-        'MA trend',
-        'FFT trend',
-        'MA+FFT trend',
-    ])
+    # ax_hours_trend.legend([
+    #     name,
+    #     'MA trend',
+    #     'FFT trend',
+    #     'MA+FFT trend',
+    # ])
     ax_hours_trend.set_ylabel('Density, 1/cm^3')
-    ax_lat_trend.set_xlabel('Latitude, (deg)')
-
-    ax_hours_trend.set_title('{} and avg_trend'.format(data_title(name, day, hours)), y=1.12)
+    # ax_lat_trend.set_xlabel('Latitude, (deg)')
+    # ax_hours_trend.set_title('{} and avg_trend'.format(data_title(name, day, hours)), y=1.12)
 
     ax_hours_noise.grid(True)
     ax_hours_noise.plot(hours, noise)
@@ -254,13 +278,12 @@ def ut_to_hours(uts):
     return day, array([(ut - day_ut) / 3600. for ut in uts])
 
 
-def draw_wave(name, day, hours, lat, wave, noise):
+def draw_wave(name, day, hours, lat, lon, wave, noise):
     fig, (ax_hours_wave, ax_hours_noise, ax_hours_fft) = plt.subplots(3, 1, gridspec_kw={'height_ratios': [5, 2, 5]})
 
-    lat_t = lat_ticks(lat)
+    lat_t, lat_l = discrete_ticks(lat)
+    lon_t, lon_l = discrete_ticks(lon, precision=.5)
     hours_m = hours_ticks(hours)
-
-    ax_hours_wave.grid(True)
 
     filler = copy(wave)
     f_nan = isnan(filler)
@@ -268,46 +291,49 @@ def draw_wave(name, day, hours, lat, wave, noise):
     filler[fn_nan] = nan
     filler[f_nan] = 0
 
+    ax_lon_wave = ax_hours_wave.twiny()
+    ax_lon_wave.grid(True)
+    ax_lon_wave.spines['top'].set_position(('axes', 1.2))
+    make_patch_spines_invisible(ax_lon_wave)
+    ax_lon_wave.spines['top'].set_visible(True)
+    plt.setp(ax_lon_wave.xaxis.get_majorticklabels(), rotation=-90)
+    ax_lon_wave.xaxis.set_tick_params(labelsize=4)
+    ax_lon_wave.set_xticks(lon_t)
+    ax_lon_wave.set_xticklabels(lon_l)
+
     ax_lat_wave = ax_hours_wave.twiny()
-    ax_lat_wave.grid(True, linestyle=':', linewidth=0.5)
     ax_lat_wave.set_xticks(lat_t)
-    ax_lat_wave.set_xticklabels(tick_labels(lat, lat_t))
+    ax_lat_wave.set_xticklabels(lat_l)
     plt.setp(ax_lat_wave.xaxis.get_majorticklabels(), rotation=-90)
     ax_lat_wave.xaxis.set_tick_params(labelsize=4)
+
     ax_hours_wave.plot(hours, wave)
     ax_hours_wave.plot(hours, filler, color='red')
     ax_hours_wave.set_xticks(hours_m)
     plt.setp(ax_hours_wave.xaxis.get_majorticklabels(), rotation=-30)
     ax_hours_wave.xaxis.set_tick_params(labelsize=4)
-    ax_hours_wave.legend([name, 'Absent data'])
-    ax_hours_wave.set(
-        ylabel='Density, 1/cm^3',
-    )
-    ax_lat_wave.set(
-        xlabel='Latitude, (deg)'
-    )
-    ax_hours_wave.set_title('{} wave'.format(data_title(name, day, hours)), y=1.25)
+    # ax_hours_wave.legend([name, 'Absent data'])
+    ax_hours_wave.set_ylabel('Density, 1/cm^3')
+    # ax_lat_wave.set_xlabel('Latitude, (deg)')
+    # ax_hours_wave.set_title('{} wave'.format(data_title(name, day, hours)), y=1.25)
 
     ax_hours_noise.grid(True)
     ax_hours_noise.plot(hours, noise)
     ax_hours_noise.set_xticks(hours_m)
     plt.setp(ax_hours_noise.xaxis.get_majorticklabels(), rotation=-30)
     ax_hours_noise.xaxis.set_tick_params(labelsize=4)
-    ax_hours_noise.set(
-        xlabel='Day {}, (h)'.format(day),
-    )
-
+    ax_hours_noise.set_xlabel('Day {}, (h)'.format(day))
     wave[isnan(wave)] = 0  # feel up with zeros for sake of rfft
     ax_hours_fft.plot(array(range(ZEROFILL_LENGTH // 2 + 1)), absolute(rfft(zerofilled_signal(wave))))
 
     return fig
 
 
-def analyze_param(sampling, day, hours, lat, parameter, name):
+def analyze_param(sampling, day, hours, lat, lon, parameter, name):
     wave, avg_trend, fft_trend, noise = remove_trend(sampling, parameter)
     return (
-        draw_trend(name, day, hours, lat, parameter, avg_trend, fft_trend, noise),
-        draw_wave(name, day, hours, lat, wave, noise),
+        draw_trend(name, day, hours, lat, lon, parameter, avg_trend, fft_trend, noise),
+        draw_wave(name, day, hours, lat, lon, wave, noise),
     )
 
 
