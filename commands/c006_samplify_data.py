@@ -70,22 +70,20 @@ def enhance_segment(segment, sampling):
         search_boundaries[1]
     ]
     logger.debug('\t\t\t{:.0f} : {:.0f} - search gate'.format(*segment['segment']))
-    if search_boundaries[1] + 1 not in ut_markers:
-        return None
     logger.debug('\t\t\t{} - {}'.format(
         ut_markers[search_boundaries[0]],
-        ut_markers[search_boundaries[1] + 1]
+        ut_markers[search_boundaries[1]]
     ))
     logger.debug('\t\t\t{} ...{}... {}'.format(
         basename(ut_refs[ut_markers[search_boundaries[0]]]),
-        search_boundaries[1] + 1 - search_boundaries[0],
-        basename(ut_refs[ut_markers[search_boundaries[1] + 1]])
+        search_boundaries[1] - search_boundaries[0],
+        basename(ut_refs[ut_markers[search_boundaries[1]]])
     ))
 
     wide_data_context = concatenate([
         local_preload(ut_refs[ut_markers[idx]], FileParser, SourceNACSRow, ut_refs[ut_markers[idx]]).get(*from_fields)
-        for idx in range(search_boundaries[0], search_boundaries[1] + 1)
-    ])
+        for idx in range(search_boundaries[0], search_boundaries[1])
+      ])
     logger.debug('\t\t\t{} - wide data length'.format(len(wide_data_context)))
     logger.debug('\t\t\t{:.0f} : {:.0f}'.format(wide_data_context[0][0], wide_data_context[-1][0]))
 

@@ -136,12 +136,14 @@ page_tpl = """<!DOCTYPE html>
         <h1>{start_date} - {end_date}</h1>
         <h2>
             <a href="../samplings/{sampling:0>3}/{datafile}"><i class="fas fa-cart-arrow-down"></i></a>
-            Sampling: {sampling} sec / Points no.: {points} / Duration: {duration} sec
+            Sampling: {sampling} sec / Points no.: {points} / Duration: {duration:.2f} sec
         </h2>
-        <div>
-            <h3>Segment data</h3>
-            <img src="../samplings/{sampling:0>3}/{alldata}" width="100%" />
-        </div>
+        <!--
+        # <div>
+        #     <h3>Segment data</h3>
+        #     <img src="../samplings/{sampling:0>3}/{alldata}" width="100%" />
+        # </div>
+        -->
         <div>
             <h3>O density</h3>
             <img src="../samplings/{sampling:0>3}/{o_trend}" width="100%" />
@@ -186,7 +188,7 @@ def main():
     <th scope="col">N</th>
     </tr>"""
     sampling_links = []
-    for sampling in range(1, 199):
+    for sampling in [1]:  # range(1, 199):
         table_data += """<thead class="thead-dark">
         <tr><th scope="col" colspan="7">
         <h3>
