@@ -5,19 +5,18 @@ from os import makedirs  # noqa: E402
 from os.path import join, basename  # noqa: E402
 from datetime import datetime  # noqa: E402
 
-from numpy import max, min, ceil, copy, array, zeros, absolute  # noqa: E402
-from numpy.fft import rfft, irfft  # noqa: E402
+from numpy import abs, max, min, ceil, array, where, zeros, absolute  # noqa: E402
 from matplotlib import pyplot as plt  # noqa: E402
 from scipy.signal import hilbert, argrelmax, argrelmin  # noqa: E402
 
 from ionospheredata.utils import local_preload  # noqa: E402
 from ionospheredata.parser import FileParser, SampledNACSRow  # noqa: E402
-from ionospheredata.settings import ARTIFACTS_DIR  # noqa: E402
+from ionospheredata.settings import ARTIFACTS_DIR, ZEROFILL_LENGTH, GW_MIN_WAVELENGTH, SATELLITE_VELOCITY  # noqa: E402
 
 from .logger import logger  # noqa: E402
 from .c007_moving_average import omit_zeros, remove_trend, segments_list, smooth_signal  # noqa: E402
 
-RESULTS_DIR = join(ARTIFACTS_DIR, 'thesis_results')
+RESULTS_DIR = join(ARTIFACTS_DIR, 'samplings', '001')
 makedirs(RESULTS_DIR, exist_ok=True)
 
 """
@@ -38,13 +37,6 @@ Here we're working only with oxygen component of NACS `o_dens`.
 
 Later read: http://www.di.fc.ul.pt/~jpn/r/fourier/fourier.html
 """
-
-
-ZEROFILL_LENGTH = 2**16
-SATELLITE_VELOCITY = 7.8
-GW_MIN_WAVELENGTH = 100
-GW_MAX_WAVELENGTH = 2500
-MINIMUM_PERTURBATION_LENGTH = int(round(300. / SATELLITE_VELOCITY))
 
 
 def zerofilled_bounds(original_length):
@@ -84,97 +76,83 @@ def data_title(name, ut):
     )
 
 
-def lat_ticks(lat, ticks):
-    return [lat[int(tick * (len(lat) - 1))] for tick in ticks]
+def discrete_ticks(lat, precision=5.0):
+    ticks = []
+    labels = []
+    last_tick = None
+    lat_l = len(lat)
+    for idx, lat_v in enumerate(lat):
+        tick_value = (lat_v // precision) * precision
+        if tick_value != last_tick:
+            last_tick = tick_value
+            ticks.append(idx / lat_l)
+            labels.append(tick_value)
+
+    return ticks, labels
+
+
+def hours_ticks(hours):
+    hours_i = [int(hour * 50) / 50. for hour in hours]
+    return list(sorted(list(set(hours_i))))
+
+
+def ut_to_hours(uts):
+    return array([ut / 3600000. for ut in uts])
+
+
+def make_patch_spines_invisible(ax):
+    ax.set_frame_on(True)
+    ax.patch.set_visible(False)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
 
 
 def analyze_segment(sampling, segment_file):
     segment_data = local_preload(segment_file, FileParser, SampledNACSRow, segment_file)
-    # ut = (segment_data.get('ut', transposed=True)[0] - 347155200) / 3600 - 5472
     ut = segment_data.get('ut', transposed=True)[0]
     lat = segment_data.get('lat', transposed=True)[0]
+    lon = segment_data.get('lon', transposed=True)[0]
     o_dens = omit_zeros(segment_data.get('o_dens', transposed=True)[0])
-    signal, trend = remove_trend(sampling, o_dens)
+    hours = ut_to_hours(ut)
+
+    signal, trend, fft_trend, noise = remove_trend(sampling, o_dens)
 
     original_length = len(o_dens)
     RO = lambda x: original_signal(x, original_length)  # noqa: E731
 
     signal = zerofilled_signal(signal)
-    ut = zerofilled_ut(ut, sampling)
+    # ut = zerofilled_ut(ut, sampling)
 
-    parameter_name = 'Oxygen density'
-
-    fig_name_filtering = join(RESULTS_DIR, basename(segment_file)[:-3] + 'filtering.png')
     fig_name_hilbert = join(RESULTS_DIR, basename(segment_file)[:-3] + 'hilbert.png')
-
-    fig_filtering = plt.figure()
-    ax_ut = fig_filtering.add_subplot(311)
-    ax_lat = ax_ut.twiny()
-    ax_lat.set_xticks(ax_ut.get_xticks())
-    ax_lat.set_xticklabels(lat_ticks(lat, ax_ut.get_xticks()))
-    ax_ut.plot(RO(ut), o_dens)
-    ax_ut.plot(RO(ut), trend)
-    ax_ut.legend([
-        parameter_name,
-        'Moving average',
-    ])
-    ax_ut.set(
-        xlabel='Universal time, (s)',
-        ylabel='Density, 1/cm^3',
-    )
-    ax_lat.set(
-        xlabel='Latitude, (deg)'
-    )
-
-    # Signal information
-    ax_ut = fig_filtering.add_subplot(323)
-    ax_lat = ax_ut.twiny()
-    ax_lat.set_xticks(ax_ut.get_xticks())
-    ax_lat.set_xticklabels(lat_ticks(lat, ax_ut.get_xticks()))
-    ax_ut.plot(RO(ut), RO(signal))
-    ax_ut = fig_filtering.add_subplot(324)
-    spectra = rfft(signal)
-    frequencies = array(range(len(spectra)))  # rfftfreq(len(signal), 1.)
-    ax_ut.plot(frequencies, absolute(spectra))
-
-    min_threshold_index = int(round(ZEROFILL_LENGTH * SATELLITE_VELOCITY / GW_MIN_WAVELENGTH))
-    max_threshold_index = int(round(ZEROFILL_LENGTH * SATELLITE_VELOCITY / GW_MAX_WAVELENGTH))
-    # min_threshold_freq = 2 * pi * SATELLITE_VELOCITY / GW_MIN_WAVELENGTH
-    # max_threshold_freq = 2 * pi * SATELLITE_VELOCITY / GW_MAX_WAVELENGTH
-
-    new_spectra = copy(spectra)
-    new_spectra[:max_threshold_index] = 0
-    new_spectra[min_threshold_index:] = 0
-
-    new_signal = irfft(new_spectra)
-
-    # Signal information after filtering. Use signal 100..2500 km
-    ax_ut = fig_filtering.add_subplot(325)
-    ax_lat = ax_ut.twiny()
-    ax_lat.set_xticks(ax_ut.get_xticks())
-    ax_lat.set_xticklabels(lat_ticks(lat, ax_ut.get_xticks()))
-    ax_ut.plot(RO(ut), RO(new_signal))
-
-    ax_ut = fig_filtering.add_subplot(326)
-    ax_ut.plot(frequencies, absolute(spectra), '-')
-    ax_ut.plot(frequencies, absolute(new_spectra))
-
-    fig_filtering.savefig(fig_name_filtering, dpi=300, papertype='a0', orientation='landscape')
-    plt.close(fig_filtering)
 
     # Hilbert analysis
     fig_hilbert = plt.figure()
-    ax_ut = fig_hilbert.add_subplot(111)
-    ax_lat = ax_ut.twiny()
-    ax_lat.set_xticks(ax_ut.get_xticks())
-    ax_lat.set_xticklabels(lat_ticks(lat, ax_ut.get_xticks()))
+    ax_hours_hilbert = fig_hilbert.add_subplot(111)
+    lat_t, lat_l = discrete_ticks(lat)
+    lon_t, lon_l = discrete_ticks(lon, precision=.5)
+    hours_m = hours_ticks(hours)
+
+    ax_lon_trend = ax_hours_hilbert.twiny()
+    ax_lon_trend.grid(True)
+    ax_lon_trend.spines['top'].set_position(('axes', 1.08))
+    make_patch_spines_invisible(ax_lon_trend)
+    ax_lon_trend.spines['top'].set_visible(True)
+    plt.setp(ax_lon_trend.xaxis.get_majorticklabels(), rotation=-90)
+    ax_lon_trend.xaxis.set_tick_params(labelsize=4)
+    ax_lon_trend.set_xticks(lon_t)
+    ax_lon_trend.set_xticklabels(lon_l)
+
+    ax_lat_trend = ax_hours_hilbert.twiny()
+    ax_lat_trend.set_xticks(lat_t)
+    ax_lat_trend.set_xticklabels(lat_l)
+    plt.setp(ax_lat_trend.xaxis.get_majorticklabels(), rotation=-90)
+    ax_lat_trend.xaxis.set_tick_params(labelsize=4)
 
     # 13s ~= 100km / 7.8km/s
     smoother = lambda x: smooth_signal(sampling, x, ceil(GW_MIN_WAVELENGTH / SATELLITE_VELOCITY))  # noqa: E731
 
-    energy_signal = absolute(new_signal)
+    energy_signal = absolute(signal)
     smoothed_signal = energy_signal
-    # smoothed_signal = smoother(energy_signal)
 
     analytic_signal_1 = hilbert(smoothed_signal)
     amplitude_envelope_1 = absolute(analytic_signal_1)
@@ -182,19 +160,41 @@ def analyze_segment(sampling, segment_file):
     analytic_signal_2 = hilbert(amplitude_envelope_1)
     amplitude_envelope_2 = absolute(analytic_signal_2)
 
-    ax_ut.plot(RO(ut), RO(new_signal))
-    # ax_ut.plot(RO(ut), RO(energy_signal))
-    # ax_ut.plot(RO(ut), RO(smoothed_signal))
-    # ax_ut.plot(RO(ut), amplitude_envelope_1)
-    # ax_ut.plot(RO(ut), RO(amplitude_envelope_2))
+    ax_hours_hilbert.plot(hours, RO(signal))
     enveloping_line = RO(smoother(amplitude_envelope_2))
-    ax_ut.plot(RO(ut), enveloping_line, '-')
-    signal_line = RO(new_signal)
+    ax_hours_hilbert.plot(hours, enveloping_line, '-')
+    signal_line = RO(signal)
+
+    packages_to_write = []
+
+    trend_full = trend + fft_trend
 
     for n, package in enumerate(select_packages(enveloping_line, 3)):
-        # logger.error('{} - ratio: {} - diff: {}'.format(n, package['ratio'], package['diff']))
-        ax_ut.plot(RO(ut)[package['start']:package['end']], signal_line[package['start']:package['end']])
-        ax_ut.plot(RO(ut)[package['max_point']], enveloping_line[package['max_point']], 'x', color='blue')
+        relative = abs(signal_line[package['start']:package['end']] / trend_full[package['start']:package['end']])
+        max_value = max(relative)
+        max_location = package['start'] + where(relative == max_value)[0][0]
+        max_lat = lat[max_location]
+        packages_to_write.append([
+            basename(segment_file)[:7],
+            ut[package['start']], lat[package['start']], lon[package['start']],
+            ut[package['end']], lat[package['end']], lon[package['end']],
+            max_value,
+            max_lat,
+        ])
+        ax_hours_hilbert.plot(hours[package['start']:package['end']], signal_line[package['start']:package['end']])
+        ax_hours_hilbert.plot(hours[package['max_point']], enveloping_line[package['max_point']], 'x', color='blue')
+
+    maximums = {pack[-1] for pack in packages_to_write}
+
+    for maximum in maximums:
+        packs = [pack for pack in packages_to_write if pack[-1] == maximum]
+        left_pack = sorted(packs, key=lambda p: p[1])[0]
+        right_pack = sorted(packs, key=lambda p: p[4])[-1]
+        logger.error('package::\t{};{};{};{};{};{};{};{:.4f};{}'.format(*left_pack[:4], *right_pack[4:]))
+
+    ax_hours_hilbert.set_xticks(hours_m)
+    plt.setp(ax_hours_hilbert.xaxis.get_majorticklabels(), rotation=-30)
+    ax_hours_hilbert.xaxis.set_tick_params(labelsize=4)
 
     fig_hilbert.savefig(fig_name_hilbert, dpi=300, papertype='a0', orientation='landscape')
     plt.close(fig_hilbert)
@@ -251,10 +251,8 @@ def select_packages(signal, threshold):
 
 def main():
     sampling = 1
-    segments = segments_list(sampling)[:1]
-    segments_num = len(segments)
+    segments = segments_list(sampling)
     for n, segment_file in enumerate(segments):
-        logger.info('{} / {} - {}'.format(n + 1, segments_num, segment_file))
         analyze_segment(sampling, segment_file)
 
 

@@ -2,10 +2,9 @@ from matplotlib import use as setRenderingBackend  # isort:skip noqa:E402
 setRenderingBackend('Agg')  # isort:skip
 
 from os import listdir  # noqa: E402
-from time import mktime  # noqa: E402
 from fnmatch import fnmatch  # noqa: E402
 from os.path import join, basename  # noqa: E402
-from datetime import date, datetime  # noqa: E402
+from datetime import datetime  # noqa: E402
 
 from numpy import nan, copy, array, isnan, zeros, absolute  # noqa: E402
 from numpy.fft import rfft, irfft  # noqa: E402
@@ -87,7 +86,11 @@ def tick_labels(value, ticks, precision=2.0):
 def segments_list(sampling):
     logger.info('{} - listing sampling'.format(sampling))
     sampling_dir = join(ARTIFACTS_DIR, 'samplings', '{:0>3}'.format(sampling))
-    return sorted([join(sampling_dir, fname) for fname in listdir(sampling_dir) if fnmatch(fname, '*.asc')])
+    return sorted([
+        join(sampling_dir, fname)
+        for fname in listdir(sampling_dir)
+        if fnmatch(fname, '19822*.asc') or fnmatch(fname, '19823*.asc')
+    ])
 
 
 def omit_zeros(arr):
@@ -126,7 +129,8 @@ def draw_segment(sampling, segment_file):
     lon = segment_data.get('lon', transposed=True)[0]
     o_dens = omit_zeros(segment_data.get('o_dens', transposed=True)[0])
 
-    day, hours = ut_to_hours(ut)
+    hours = ut_to_hours(ut)
+    day = basename(segment_file)[:7]
 
     param_name = 'O density'
 
@@ -268,14 +272,7 @@ def draw_trend(name, day, hours, lat, lon, parameter, avg_trend, fft_trend, nois
 
 
 def ut_to_hours(uts):
-    day_date = datetime.fromtimestamp(uts[0])
-    day = day_date.strftime('%Y/%j')
-    day_ut = mktime(date(
-        int(day_date.strftime('%Y')),
-        int(day_date.strftime('%-m')),
-        int(day_date.strftime('%-d')),
-    ).timetuple())
-    return day, array([(ut - day_ut) / 3600. for ut in uts])
+    return array([ut / 3600000. for ut in uts])
 
 
 def draw_wave(name, day, hours, lat, lon, wave, noise):

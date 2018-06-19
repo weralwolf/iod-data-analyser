@@ -1,7 +1,7 @@
 import json
-from os import makedirs
+from os import listdir, makedirs
+from fnmatch import fnmatch
 from os.path import join
-from datetime import datetime
 
 from ionospheredata.settings import ARTIFACTS_DIR
 
@@ -204,7 +204,12 @@ def main():
         )
         sampling_links.append('<a href="#sampling-{sampling}">{sampling}</a>'.format(sampling=sampling))
         sampling_dir = join(SAMPLINGS_DIR, '{:0>3}'.format(sampling))
-        segments_data = sorted(json.load(open(join(sampling_dir, '000_list.json'))), key=lambda x: x['segment'][0])
+        segments_files = sorted([
+            join(sampling_dir, fname)
+            for fname in listdir(sampling_dir)
+            if fnmatch(fname, '000.19822*.json') or fnmatch(fname, '000.19823*.json')
+        ])
+        segments_data = sorted(sum([json.load(open(fname)) for fname in segments_files], []), key=lambda x: (x['day'], x['segment'][0]))
         table_data += '<tbody>'
 
         for ne, segment in enumerate(segments_data):
@@ -226,8 +231,8 @@ def main():
                 alldata=datafile_name + 'png',
                 sampling=sampling,
                 datafile=segment['filename'],
-                start_date=datetime.fromtimestamp(segment['segment'][0]).strftime('%Y.%j at %H:%M:%S'),
-                end_date=datetime.fromtimestamp(segment['segment'][1]).strftime('%Y.%j at %H:%M:%S'),
+                start_date='{} / {} at {:.2f} h'.format(segment['day'][:4], segment['day'][4:], segment['segment'][0] / 3600),
+                end_date='{} / {} at {:.2f} h'.format(segment['day'][:4], segment['day'][4:], segment['segment'][1] / 3600),
                 duration=segment['duration'],
                 points=segment['points'],
             )
