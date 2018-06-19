@@ -4,6 +4,7 @@ setRenderingBackend('Agg')  # isort:skip
 from os import makedirs  # noqa: E402
 from os.path import join, basename  # noqa: E402
 from datetime import datetime  # noqa: E402
+from commands.utils.logger import logger  # noqa: E402
 
 from numpy import abs, max, min, ceil, array, where, zeros, absolute  # noqa: E402
 from matplotlib import pyplot as plt  # noqa: E402
@@ -13,7 +14,6 @@ from ionospheredata.utils import local_preload  # noqa: E402
 from ionospheredata.parser import FileParser, SampledNACSRow  # noqa: E402
 from ionospheredata.settings import ARTIFACTS_DIR, ZEROFILL_LENGTH, GW_MIN_WAVELENGTH, SATELLITE_VELOCITY  # noqa: E402
 
-from .logger import logger  # noqa: E402
 from .c007_moving_average import omit_zeros, remove_trend, segments_list, smooth_signal  # noqa: E402
 
 RESULTS_DIR = join(ARTIFACTS_DIR, 'samplings', '001')

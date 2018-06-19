@@ -1,11 +1,10 @@
 import hashlib
 from os.path import join, basename
+from commands.utils.logger import logger
 
 from ionospheredata.utils import local_preload, list_datafiles
 from ionospheredata.parser import FileParser, SourceNACSRow, SourceWATSRow
 from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR
-
-from .logger import logger
 
 
 """

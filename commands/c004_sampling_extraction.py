@@ -2,15 +2,14 @@ import json
 from math import sqrt
 from os.path import join
 from datetime import date
+from commands.utils import chalk
+from commands.utils.logger import logger
 
-import chalk
 from numpy import abs, array, isnan, round, concatenate
 
 from ionospheredata.utils import local_preload
 from ionospheredata.parser import FileParser, SourceNACSRow
 from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR
-
-from .logger import logger
 
 
 """
@@ -124,7 +123,8 @@ def sample(key, dirname, RowParser, sampling):
             if deltas[idx] - sampling >= 0.5:
                 year = date.fromtimestamp(ut[starts_at]).strftime('%Y / %j')
                 if deltas[idx] > 500.:
-                    logger.info(chalk.red('{:0>4d}\t..\t\t\t{:.2f}'.format(sampling, deltas[idx]), bold=True, underline=True))
+                    logger.info(
+                        chalk.red('{:0>4d}\t..\t\t\t{:.2f}'.format(sampling, deltas[idx]), bold=True, underline=True))
                 segment_length = ut[idx] - ut[starts_at]
 
                 if segment_length > min_sequence_duration:

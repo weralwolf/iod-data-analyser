@@ -5,14 +5,13 @@ import json  # noqa:E402
 from os import listdir, makedirs  # noqa:E402
 from fnmatch import fnmatch  # noqa:E402
 from os.path import join, basename  # noqa:E402
+from commands.utils.logger import logger  # noqa: F401, E402
 
 from numpy import concatenate  # noqa:E402
 
 from ionospheredata.utils import round, local_preload  # noqa:E402
 from ionospheredata.parser import FileParser, FileWriter, SourceNACSRow, SampledNACSRow  # noqa:E402
 from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR  # noqa:E402
-
-from .logger import logger  # noqa: F401, E402
 
 
 """

@@ -1,10 +1,9 @@
 from os.path import join, basename
+from commands.utils.logger import logger
 
 from ionospheredata.utils import local_preload, list_datafiles
 from ionospheredata.parser import FileParser, SourceNACSRow, SourceWATSRow
 from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR
-
-from .logger import logger
 
 
 """
@@ -36,7 +35,6 @@ def bad_files(RowParser, dirname):
 
 
 def data_report(key, RowParser, dirname):
-    # bad_datafiles = local_preload('{}_bad_files'.format(key), bad_files, RowParser, dirname)
     datafiles = list_datafiles(dirname)
     doppelganger_class = set()
     dc_eof = 0  # usually doppleganers appears at the end of the file, but better check it

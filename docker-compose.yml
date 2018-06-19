@@ -10,3 +10,12 @@ services:
     environment:
       ENV: Local
     command: ./manage.py exec all
+
+  iod-test:
+    build: .
+    restart: always
+    volumes:
+      - ".:/usr/app"
+    environment:
+      ENV: Local
+    command: pytest

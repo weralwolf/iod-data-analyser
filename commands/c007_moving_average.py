@@ -5,6 +5,7 @@ from os import listdir  # noqa: E402
 from fnmatch import fnmatch  # noqa: E402
 from os.path import join, basename  # noqa: E402
 from datetime import datetime  # noqa: E402
+from commands.utils.logger import logger  # noqa: E402
 
 from numpy import nan, copy, array, isnan, zeros, absolute  # noqa: E402
 from numpy.fft import rfft, irfft  # noqa: E402
@@ -16,8 +17,6 @@ from ionospheredata.parser import FileParser, SampledNACSRow  # noqa: E402
 from ionospheredata.settings import (  # noqa: E402
     ARTIFACTS_DIR, ZEROFILL_LENGTH, GW_MAX_WAVELENGTH, GW_MIN_WAVELENGTH, SATELLITE_VELOCITY
 )
-
-from .logger import logger  # noqa: E402
 
 """
 Task.

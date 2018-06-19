@@ -6,7 +6,7 @@ import time
 
 
 class cached_property(object):
-    '''Decorator for read-only properties evaluated only once within TTL period.
+    """Decorator for read-only properties evaluated only once within TTL period.
 
     It can be used to create a cached property like this::
 
@@ -35,7 +35,7 @@ class cached_property(object):
 
         del instance._cache[<property name>]
 
-    '''
+    """
     def __init__(self, ttl=300):
         self.ttl = ttl
 

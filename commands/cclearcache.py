@@ -1,10 +1,9 @@
 from os import remove, listdir
 from fnmatch import fnmatch
 from os.path import join
+from commands.utils.logger import logger
 
 from ionospheredata.settings import CACHE_DIR
-
-from .logger import logger
 
 
 def main():

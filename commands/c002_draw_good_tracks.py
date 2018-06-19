@@ -3,6 +3,7 @@ setRenderingBackend('Agg')  # isort:skip
 
 from os.path import join, basename  # noqa:E402
 from datetime import datetime  # noqa:E402
+from commands.utils.logger import logger  # noqa:E402
 
 import numpy as np  # noqa:E402
 import matplotlib.pyplot as plt  # noqa:E402
@@ -11,8 +12,6 @@ from mpl_toolkits.basemap import Basemap  # noqa:E402
 from ionospheredata.utils import list_datafiles  # noqa:E402
 from ionospheredata.parser import FileParser, SourceNACSRow, SourceWATSRow  # noqa:E402
 from ionospheredata.settings import TRACKS_DIR, ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR  # noqa:E402
-
-from .logger import logger  # noqa:E402
 
 
 def chunkup(RowParser, filename):
