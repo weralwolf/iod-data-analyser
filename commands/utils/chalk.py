@@ -1,7 +1,9 @@
+from typing import Callable
+
 from colored import bg, fg, attr, stylize
 
 
-def _make_color_function(color):
+def _make_color_function(color) -> Callable:
     def wrapped(msg):
         return stylize(msg, color)
     return wrapped

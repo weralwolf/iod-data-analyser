@@ -3,12 +3,12 @@ from math import sqrt
 from os.path import join
 from datetime import date
 from commands.utils import chalk
+from commands.parsers import FileParser, SourceNACSRow
 from commands.utils.logger import logger
 
 from numpy import abs, array, isnan, round, concatenate
 
 from ionospheredata.utils import local_preload
-from ionospheredata.parser import FileParser, SourceNACSRow
 from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR
 
 

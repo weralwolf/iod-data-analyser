@@ -1,8 +1,8 @@
 import pickle
-import hashlib
 from os import remove, listdir
 from typing import Any, Callable
 from fnmatch import fnmatch
+from hashlib import md5
 from os.path import join
 
 from ionospheredata.settings import CACHE_DIR
@@ -24,9 +24,10 @@ class LocalCache:
     """
     cachefile_extension = 'pydata'
 
-    def __init__(self, key: str=None, force_reload: bool=False):
+    def __init__(self, key: str=None, force_reload: bool=False, cache_dir=CACHE_DIR):
         self.key = key
         self.force_reload = force_reload
+        self.cache_dir = cache_dir
 
     def __call__(self, func: Callable):
         key = self.key if self.key is not None else func.__name__
@@ -42,10 +43,10 @@ class LocalCache:
 
     def _hash(self, key, *args, **kwargs) -> str:
         params_str = self._process_parameters(*args, **kwargs)
-        return hashlib.md5(str(key + params_str).encode('utf-8')).hexdigest()
+        return md5(str(key + params_str).encode('utf-8')).hexdigest()
 
     def _filename(self, hash: str) -> str:
-        return join(CACHE_DIR, hash + '.' + self.cachefile_extension)
+        return join(self.cache_dir, hash + '.' + self.cachefile_extension)
 
     def _cache_result(self, hash: str, result: Any) -> Any:
         with open(self._filename(hash), 'wb') as datafile:
@@ -73,10 +74,15 @@ class LocalCache:
         return repr(value)
 
     @classmethod
-    def clear_cache(cls):
+    def clear_cache(cls, cache_dir=CACHE_DIR):
         removed_hashes = []
-        for filename in listdir(CACHE_DIR):
+        for filename in listdir(cache_dir):
             if fnmatch(filename, '*.' + cls.cachefile_extension):
-                remove(join(CACHE_DIR, filename))
+                remove(join(cache_dir, filename))
                 removed_hashes.append(filename[:-(1 + len(cls.cachefile_extension))])
         return removed_hashes
+
+
+@LocalCache
+def run_cached(func, *args, **kwargs):
+    return func(*args, **kwargs)

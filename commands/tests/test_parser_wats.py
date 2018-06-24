@@ -1,7 +1,6 @@
 from os.path import join, abspath, dirname
 from unittest import TestCase
-
-from ionospheredata.parser import FileParser, SourceWATSRow
+from commands.parsers import FileParser, SourceWATSRow
 
 TESTDATAPATH = abspath(join(dirname(__file__), 'test_data'))
 

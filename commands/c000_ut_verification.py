@@ -1,8 +1,8 @@
 from os.path import join, basename
+from commands.parsers import FileParser, SourceNACSRow, SourceWATSRow
 from commands.utils.logger import logger
 
 from ionospheredata.utils import local_preload, list_datafiles
-from ionospheredata.parser import FileParser, SourceNACSRow, SourceWATSRow
 from ionospheredata.settings import ARTIFACTS_DIR, DE2SOURCE_NACS_DIR, DE2SOURCE_WATS_DIR
 
 
@@ -13,25 +13,6 @@ there's a two types of problems each file can have inside:
 1. UT jumps: when ut behaves not monotonically;
 2. UT duplicates: when ut records have duplicates next to them;
 """
-
-
-def check_ut_monotone(filename, RowParser):
-    filedata = local_preload(filename, FileParser, RowParser, filename)
-    uts = filedata.get('ut_of_day', transposed=True)[0]
-    for idx in range(1, len(uts)):
-        if uts[idx] <= uts[idx - 1]:
-            return False
-    return True
-
-
-def bad_files(RowParser, dirname):
-    bads = []
-    datafiles = list_datafiles(dirname)
-    for idx, filename in enumerate(datafiles):
-        if not check_ut_monotone(filename, RowParser):
-            logger.degub('{} BAD ... {}'.format(idx, filename))
-            bads.append(filename)
-    return bads
 
 
 def data_report(key, RowParser, dirname):

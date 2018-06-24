@@ -1,10 +1,9 @@
 from io import StringIO
 from os import unlink
 from tempfile import NamedTemporaryFile
+from commands.parsers import FileParser, FileWriter, SampledNACSRow
 
 from numpy import array
-
-from ionospheredata.parser import FileParser, FileWriter, SampledNACSRow
 
 # 'ut', 'o_dens', 'o_err', 'n2_dens', 'n2_err', 'he_dens', 'he_err', 'n_dens', 'n_err', 'ar_dens',
 # 'ar_err', 'orbit', 'alt', 'lat', 'lon', 'lst', 'lmt', 'l_sh', 'inv_lat', 'sza'

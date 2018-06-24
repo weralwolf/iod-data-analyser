@@ -1,6 +1,5 @@
 from collections import OrderedDict
-
-from .row_parser import RowParser
+from commands.parsers.row_parser import RowParser
 
 
 class SampledNACSRow(RowParser):
