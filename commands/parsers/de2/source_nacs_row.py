@@ -1,18 +1,11 @@
 from collections import OrderedDict
 from commands.parsers.row_parser import RowParser
 
-from ionospheredata.utils import absolute_ut
-
-
-def nacs_ut(ut_of_day, day_of_year, year, **kwargs):
-    return absolute_ut(year, day_of_year, ut_of_day)
-
 
 class SourceNACSRow(RowParser):
     seed = [
         OrderedDict([
-            ('ut_of_day', ((0, 9), int)),
-            ('ut', (nacs_ut, float)),
+            ('ut', ((0, 9), int)),
             ('o_dens', ((9, 22), float)),
             ('o_err', ((22, 29), float)),
             ('n2_dens', ((29, 42), float)),

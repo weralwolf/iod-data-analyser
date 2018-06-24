@@ -4,8 +4,7 @@ from typing import Any, Callable
 from fnmatch import fnmatch
 from hashlib import md5
 from os.path import join
-
-from ionospheredata.settings import CACHE_DIR
+from commands.settings.base import CACHE_DIR
 
 
 class LocalCache:
@@ -81,8 +80,3 @@ class LocalCache:
                 remove(join(cache_dir, filename))
                 removed_hashes.append(filename[:-(1 + len(cls.cachefile_extension))])
         return removed_hashes
-
-
-@LocalCache
-def run_cached(func, *args, **kwargs):
-    return func(*args, **kwargs)

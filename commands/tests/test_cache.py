@@ -1,4 +1,4 @@
-from commands.utils.cache import LocalCache
+from commands.utils.local_cache import LocalCache
 
 
 class HashableObject:

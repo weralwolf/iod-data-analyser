@@ -2,8 +2,7 @@ from sys import stdout
 from logging import INFO, DEBUG, Formatter, StreamHandler, getLogger
 from os.path import join
 from logging.handlers import TimedRotatingFileHandler
-
-from ionospheredata.settings import LOGS_DIR, LOGGING_LEVEL
+from commands.settings.base import LOGS_DIR, LOGGING_LEVEL
 
 from .chalk import green, yellow, dim_grey, dim_light_grey
 

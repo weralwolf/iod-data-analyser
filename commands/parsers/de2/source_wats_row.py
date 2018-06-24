@@ -1,12 +1,6 @@
 from collections import OrderedDict
 from commands.parsers.row_parser import RowParser
 
-from ionospheredata.utils import absolute_ut
-
-
-def wats_ut(year, day, ut_of_day, **kwargs):
-    return absolute_ut(1900 + year, day, ut_of_day)
-
 
 class SourceWATSRow(RowParser):
     seed = [
@@ -14,9 +8,8 @@ class SourceWATSRow(RowParser):
             ('year', ((1, 3), int)),
             ('day', ((3, 6), int)),
             # 1 - date   (I5)    [yyddd]
-            ('ut_of_day', ((6, 15), int)),
+            ('ut', ((6, 15), int)),
             # 2 - UT         (I9)    [ms]
-            ('ut', (wats_ut, float)),
             ('mode', ((15, 17), int)),
             # 3 - Mode   (I2)        =3,4 measuring the horizontal velocity
             #             =5,6 measuring the vertical velocity
