@@ -1,8 +1,8 @@
 from os.path import basename
+from commands.utils.types import FileList
 from commands.utils.local_cache import LocalCache
 from commands.utils.resolve_data_source import resolve_data_source
 
-from .types import FileList
 from .parsed_data import parsed_data
 from .deduplicated_files import deduplicated_files
 
@@ -25,9 +25,9 @@ def unintersected_files(source_marker: str) -> FileList:
             unitersected.append((filename, ut[0], ut[-1]))
             continue
 
-        if ut[0] <= unitersected[-1][1] <= ut[-1] or ut[0] <= unitersected[-1][1] <= ut[-1]:
+        if ut[0] <= unitersected[-1][1] <= ut[-1] or ut[0] <= unitersected[-1][2] <= ut[-1]:
             unitersected.pop()
         else:
             unitersected.append((filename, ut[0], ut[-1]))
 
-    return unitersected
+    return [filename for filename, start, end in unitersected]

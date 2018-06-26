@@ -12,7 +12,6 @@ class FileParser:
         self.filename = filename
         self._data = None
         self._parse()
-        self._ut_jump_fix()
         self._RowParser = RowParser
 
     def _parse(self):
@@ -22,25 +21,13 @@ class FileParser:
 
     def get(self, *params, transposed=False):
         idxs = [self.names.index(param) for param in params]
-        data = None
         if len(idxs) == 1:
             idx = idxs[0]
             data = self._data[:, idx:(idx + 1)]
         else:
             data = concatenate([self._data[:, idx:(idx + 1)] for idx in idxs], axis=1)
-        return data if not transposed else transpose(data)
 
-    def _ut_jump_fix(self):
-        utidx = self.names.index('ut')
-        ut = self._data[:, utidx]
-        diff = list(filter(lambda x: x[1] < 0, [(idx, ut[idx] - ut[idx - 1]) for idx in range(1, len(ut))]))
-        if len(diff) == 0:
-            return  # There's no jumps to fix
-        # if len(diff) > 1:
-        #     raise ValueError('There's more than 1 jump in data at: {}'.format(self.filename))
-        print('Fixing ut jump in data of {}'.format(self.filename))
-        idx = diff[0][0]
-        self._data[idx:, utidx] += 24 * 3600  # seconds in 1 day
+        return data if not transposed else transpose(data)
 
     @property
     def data(self):
