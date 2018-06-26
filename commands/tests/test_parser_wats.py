@@ -1,20 +1,19 @@
-from os.path import join, abspath, dirname
-from unittest import TestCase
-from commands.parsers import FileParser, SourceWATSRow
+from os.path import join
+from commands.parsers import FileParser
+from commands.parsers.de2 import SourceWATSRow
+from commands.settings.de2 import DE2_SOURCE_WATS
+from commands.utils.resolve_data_source import resolve_data_source
 
-TESTDATAPATH = abspath(join(dirname(__file__), 'test_data'))
 
+def test_simple_wats():
+    path, _, _, _ = resolve_data_source(DE2_SOURCE_WATS)
+    parser = FileParser(SourceWATSRow, join(path, '1982229_de2_wats_2s_v01.asc'))
 
-class TestParserWATS(TestCase):
-    def test_simple(self):
-        parser = FileParser(SourceWATSRow, join(TESTDATAPATH, '1981220_de2_wats_2s_v01.asc'))
+    utsod = parser.get('ut', 'tn')
+    assert utsod.shape == (4826, 2)
 
-        utsod = parser.get('ut_of_day')
-        self.assertEqual(utsod.shape, (2, 1))
-        self.assertEqual(utsod[0][0], 57240718)
-        self.assertEqual(utsod[1][0], 57248718)
+    assert utsod[0][0] == 9762724
+    assert utsod[1][0] == 9764724
 
-        uts = parser.get('ut')
-        self.assertEqual(uts.shape, (2, 1))
-        self.assertEqual(uts[0][0], 366220440.718)
-        self.assertEqual(uts[1][0], 366220448.718)
+    assert utsod[0][1] == 822.8
+    assert utsod[1][1] == 830.5

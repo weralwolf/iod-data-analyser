@@ -6,7 +6,7 @@ from commands.utils.resolve_data_source import resolve_data_source
 from .types import FileList
 
 
-@LocalCache
+@LocalCache()
 def all_files(source_marker) -> FileList:
     path, parser_class, selector, features_extractor = resolve_data_source(source_marker)
     return [

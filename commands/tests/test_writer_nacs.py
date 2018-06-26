@@ -1,7 +1,8 @@
 from io import StringIO
 from os import unlink
 from tempfile import NamedTemporaryFile
-from commands.parsers import FileParser, FileWriter, SampledNACSRow
+from commands.parsers import FileParser, FileWriter
+from commands.parsers.de2 import SampledNACSRow
 
 from numpy import array
 

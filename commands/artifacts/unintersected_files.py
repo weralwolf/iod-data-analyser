@@ -7,7 +7,7 @@ from .parsed_data import parsed_data
 from .deduplicated_files import deduplicated_files
 
 
-@LocalCache
+@LocalCache()
 def unintersected_files(source_marker: str) -> FileList:
     deduplicated_files_list = deduplicated_files(source_marker)
     path, parser_class, selector, features_extractor = resolve_data_source(source_marker)

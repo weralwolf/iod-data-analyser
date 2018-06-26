@@ -5,7 +5,7 @@ from .types import FileList
 from .monotone_files import monotone_files
 
 
-@LocalCache
+@LocalCache()
 def deduplicated_files(source_marker: str) -> FileList:
     monotone_files_list = monotone_files(source_marker)
 

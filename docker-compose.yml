@@ -16,6 +16,7 @@ services:
     restart: always
     volumes:
       - ".:/usr/app"
+      - "./commands/tests/test_data:/data"
     environment:
       ENV: Local
     command: pytest

@@ -1,20 +1,18 @@
-from os.path import join, abspath, dirname
-from unittest import TestCase
-from commands.parsers import FileParser, SourceNACSRow
+from os.path import join
+from commands.parsers import FileParser
+from commands.parsers.de2 import SourceNACSRow
+from commands.settings.de2 import DE2_SOURCE_NACS
+from commands.utils.resolve_data_source import resolve_data_source
 
-TESTDATAPATH = abspath(join(dirname(__file__), 'test_data'))
 
+def test_simple_nacs_parse():
+    path, _, _, _ = resolve_data_source(DE2_SOURCE_NACS)
+    parser = FileParser(SourceNACSRow, join(path, '1981295T072140_0_DE2_NACS_1S_V01.ASC'))
+    utsod = parser.get('ut', 'o_dens')
+    assert utsod.shape == (1546, 2)
 
-class TestParserNASC(TestCase):
-    def test_simple(self):
-        parser = FileParser(SourceNACSRow, join(TESTDATAPATH, '1981361T132320_0_DE2_NACS_1S_V01.ASC'))
+    assert utsod[0][0] == 26573128
+    assert utsod[1][0] == 26574128
 
-        utsod = parser.get('ut_of_day')
-        self.assertEqual(utsod.shape, (2, 1))
-        self.assertEqual(utsod[0][0], 48296224)
-        self.assertEqual(utsod[1][0], 48297224)
-
-        uts = parser.get('ut')
-        self.assertEqual(uts.shape, (2, 1))
-        self.assertEqual(uts[0][0], 378393896.224)
-        self.assertEqual(uts[1][0], 378393897.224)
+    assert utsod[0][1] == 7.940923E+07
+    assert utsod[1][1] == 8.019976E+07

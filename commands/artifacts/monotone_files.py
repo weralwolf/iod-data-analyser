@@ -5,7 +5,7 @@ from .all_files import all_files
 from .not_monotone_files import not_monotone_files
 
 
-@LocalCache
+@LocalCache()
 def monotone_files(source_marker: str) -> FileList:
     all_files_list = all_files(source_marker)
     not_monotone_files_list = not_monotone_files(source_marker)
