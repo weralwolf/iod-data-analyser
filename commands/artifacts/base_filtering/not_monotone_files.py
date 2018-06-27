@@ -1,8 +1,7 @@
 from commands.utils.types import FileList
 from commands.filters.monotone import monotone
 from commands.utils.local_cache import LocalCache
-
-from .all_files import all_files
+from commands.artifacts.all_files import all_files
 
 
 @LocalCache()

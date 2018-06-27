@@ -1,7 +1,7 @@
 from commands.utils.types import FileList
 from commands.utils.local_cache import LocalCache
+from commands.artifacts.all_files import all_files
 
-from .all_files import all_files
 from .not_monotone_files import not_monotone_files
 
 

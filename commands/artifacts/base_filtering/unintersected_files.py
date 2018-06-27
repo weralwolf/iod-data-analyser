@@ -1,9 +1,9 @@
 from os.path import basename
 from commands.utils.types import FileList
 from commands.utils.local_cache import LocalCache
+from commands.artifacts.parsed_data import parsed_data
 from commands.utils.resolve_data_source import resolve_data_source
 
-from .parsed_data import parsed_data
 from .deduplicated_files import deduplicated_files
 
 

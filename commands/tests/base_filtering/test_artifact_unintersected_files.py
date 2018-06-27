@@ -1,7 +1,7 @@
 from os.path import basename
-from commands.artifacts import unintersected_files
 from commands.settings.de2 import DE2_SOURCE_NACS
 from commands.settings.checks import NACS_TEST_FILES_INTERSECTED
+from commands.artifacts.base_filtering.unintersected_files import unintersected_files
 
 
 def test_unintersected_files():

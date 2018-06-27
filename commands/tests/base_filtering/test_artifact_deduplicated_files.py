@@ -1,7 +1,7 @@
 from os.path import basename
 from commands.settings.de2 import DE2_SOURCE_NACS
 from commands.settings.checks import NACS_TEST_FILES_DUPLICATES
-from commands.artifacts.deduplicated_files import deduplicated_files
+from commands.artifacts.base_filtering.deduplicated_files import deduplicated_files
 
 
 def test_deduplicated_files():
