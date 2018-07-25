@@ -19,4 +19,4 @@ services:
       - "./commands/tests/test_data:/data"
     environment:
       ENV: Local
-    command: pytest
+    command: pytest -vvv

@@ -41,7 +41,7 @@ def data_report(key, RowParser, dirname):
                 else:
                     dc_neof += 1
                 if breaking_idx == -1:  # We care about very first data compromising datapoint
-                    breaking_idx = idx - 2  # Because we count both of dopplegangers as bad datapoints
+                    breaking_idx = idx - 2  # Because we count both of doppelgangers as bad datapoints
 
             if uts[idx] < uts[idx - 1]:
                 midnightcut_class.add(file_name)

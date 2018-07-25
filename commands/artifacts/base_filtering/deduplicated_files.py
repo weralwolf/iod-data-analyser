@@ -16,4 +16,4 @@ def deduplicated_files(source_marker: str) -> FileList:
             hashes[fhash] = []
         hashes[fhash].append(filename)
 
-    return [ec[0] for ec in hashes.values()]
+    return [list(sorted(ec))[0] for ec in hashes.values()]

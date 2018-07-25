@@ -1,7 +1,10 @@
+import logging
 from os.path import basename
 from commands.settings.de2 import DE2_SOURCE_NACS
 from commands.settings.checks import NACS_TEST_FILES_OF_THE_DAY
 from commands.artifacts.files_of_the_day import files_of_the_day
+
+logger = logging.getLogger(__file__)
 
 
 def test_files_of_the_day():

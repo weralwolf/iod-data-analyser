@@ -21,7 +21,7 @@ Identify continous sections of data in fixed sampling in range [2s, ~200s].
 
 def chunkup(data):
     chunks = []
-    # Lets ignore fluctuations of sampling within 1s
+    # Lets ignore fluctuationsx of sampling within 1s
     for datafile in data:
         ut = datafile.get('ut_of_day', transposed=True)[0]
         ongoing_sampling = round(ut[1] - ut[0])  # We're sure there's no files with less than 2 datapoints
