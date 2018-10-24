@@ -5,7 +5,7 @@ from commands.parsers.file_parser import FileParserWindow
 from numpy import nan, array, isnan, split, where, concatenate
 
 
-def moving_average_sequence(x: array, window_len: int = 11, split_by_nans: bool = False) -> array:
+def moving_average_sequence(x: array, window_len: int=11, split_by_nans: bool=False) -> array:
     if len(x) == 0:
         return array([])
 

@@ -3,5 +3,6 @@ __all__ = [
     'logger',
     'cached_property',
     'resolve_data_source',
+    'moving'
     'types',
 ]

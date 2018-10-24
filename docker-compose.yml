@@ -11,7 +11,28 @@ services:
       ENV: Local
     command: ./manage.py exec all
 
-  iod-test:
+  isort:
+    build: .
+    restart: always
+    volumes:
+      - ".:/usr/app"
+      - "./commands/tests/test_data:/data"
+    environment:
+      ENV: Local
+    command: isort -y
+
+  lint:
+    build: .
+    restart: always
+    volumes:
+      - ".:/usr/app"
+      - "./commands/tests/test_data:/data"
+    environment:
+      ENV: Local
+    command: flake8
+
+
+  test:
     build: .
     restart: always
     volumes:

@@ -3,7 +3,7 @@
 PROJECT_DIR=`git rev-parse --show-toplevel`
 
 echo "Running tests..."
-docker-compose run --rm iod-test
+docker-compose run --rm test
 
 RESULT=$?
 [ $RESULT -ne 0 ] && echo "PUSH REJECTED. Please fix tests of code" && exit 1
