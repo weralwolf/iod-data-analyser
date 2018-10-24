@@ -1,5 +1,6 @@
 from os.path import join, basename
-from commands.parsers import FileParser, SourceNACSRow, SourceWATSRow
+from commands.parsers import FileParser
+from commands.parsers.de2 import SourceNACSRow, SourceWATSRow
 from commands.utils.logger import logger
 
 from ionospheredata.utils import local_preload, list_datafiles
@@ -31,7 +32,7 @@ def data_report(key, RowParser, dirname):
         file_key = basename(file_name)
         logger.debug('{}. {}'.format(n, file_key))
         filedata = local_preload(file_name, FileParser, RowParser, file_name)
-        uts = filedata.get('ut_of_day', transposed=True)[0]
+        uts = filedata.get('ut', transposed=True)[0]
         total_datapoints += len(filedata.data)
         for idx in range(1, len(uts)):
             if uts[idx] == uts[idx - 1]:

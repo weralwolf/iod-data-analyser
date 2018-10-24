@@ -6,7 +6,7 @@ from ionospheredata.configuration import isDir, ensureDir, assertConfig
 
 BASE_DIR = join(realpath(dirname(__file__)), '..', '..')
 
-ARTIFACTS_DIR = getenv('ARTIFACTS_DIR', None)
+ARTIFACTS_DIR = getenv('ARTIFACTS_DIR', join(BASE_DIR, 'artifacts'))
 assertConfig(isDir(ARTIFACTS_DIR), 'One must set `ARTIFACTS_DIR`.')
 
 CACHE_DIR = getenv('CACHE_DIR', join(ARTIFACTS_DIR, 'objects'))

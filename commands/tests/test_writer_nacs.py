@@ -20,7 +20,7 @@ NACS_SAMPLED_DATA = array([[
 ]])
 
 
-def test_writer_nacs():
+def test_writer_nacs() -> None:
     datafile = StringIO()
     fw = FileWriter(SampledNACSRow, NACS_SAMPLED_DATA)
     fw.reflect(datafile)
@@ -28,7 +28,7 @@ def test_writer_nacs():
     assert datafile.getvalue() == data_result
 
 
-def test_write_read():
+def test_write_read() -> None:
     tmp_file = NamedTemporaryFile(mode='w', delete=False)
     tmp_file_name = tmp_file.name
 

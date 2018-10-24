@@ -3,7 +3,8 @@ setRenderingBackend('Agg')  # isort:skip
 
 from os.path import join, basename  # noqa:E402
 from datetime import datetime  # noqa:E402
-from commands.parsers import FileParser, SourceNACSRow, SourceWATSRow  # noqa:E402
+from commands.parsers import FileParser  # noqa:E402
+from commands.parsers.de2 import SourceNACSRow, SourceWATSRow  # noqa:E402
 from commands.utils.logger import logger  # noqa:E402
 
 import numpy as np  # noqa:E402

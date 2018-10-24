@@ -5,7 +5,7 @@ from commands.filters.monotone import monotone
 from commands.artifacts.base_filtering.monotone_files import monotone_files
 
 
-def test_monotone_files():
+def test_monotone_files() -> None:
     files_list = monotone_files(DE2_SOURCE_NACS)
 
     for file in files_list:

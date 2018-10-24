@@ -1,9 +1,10 @@
+from typing import List
 from collections import OrderedDict
 from commands.parsers.row_parser import RowParser
 
 
 class SampledNACSRow(RowParser):
-    seed = [
+    seed: List[OrderedDict] = [
         OrderedDict([
             ('ut', ((0, 15), float)),
             ('o_dens', ((15, 30), float)),
@@ -27,5 +28,5 @@ class SampledNACSRow(RowParser):
             ('sza', ((196, 204), float)),
         ])
     ]
-    filename = OrderedDict([])
-    drop_lines = 0
+    filename: OrderedDict = OrderedDict([])
+    drop_lines: int = 0

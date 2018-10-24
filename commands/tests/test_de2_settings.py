@@ -3,7 +3,7 @@ from commands.settings.checks import NACS_TEST_FILES_ALL, WATS_TEST_FILES_ALL
 from commands.utils.resolve_data_source import resolve_data_source
 
 
-def test_source_nacs_selector():
+def test_source_nacs_selector() -> None:
     _, _, selector, _ = resolve_data_source(DE2_SOURCE_NACS)
     for filename in NACS_TEST_FILES_ALL:
         assert selector(filename)
@@ -12,7 +12,7 @@ def test_source_nacs_selector():
         assert not selector(filename)
 
 
-def test_source_nacs_features():
+def test_source_nacs_features() -> None:
     _, _, _, extractor = resolve_data_source(DE2_SOURCE_NACS)
     for filename in NACS_TEST_FILES_ALL:
         year = filename[:4]
@@ -28,7 +28,7 @@ def test_source_nacs_features():
         assert second == features['second']
 
 
-def test_source_wats_selector():
+def test_source_wats_selector() -> None:
     _, _, selector, _ = resolve_data_source(DE2_SOURCE_WATS)
     for filename in WATS_TEST_FILES_ALL:
         assert selector(filename)
@@ -37,7 +37,7 @@ def test_source_wats_selector():
         assert not selector(filename)
 
 
-def test_source_wats_features():
+def test_source_wats_features() -> None:
     _, _, _, extractor = resolve_data_source(DE2_SOURCE_WATS)
     for filename in WATS_TEST_FILES_ALL:
         year = filename[:4]

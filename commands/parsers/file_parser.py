@@ -1,14 +1,22 @@
+from typing import Any, List, Tuple, Callable, Optional
 from commands.utils.logger import logger  # noqa: F401
 
 from numpy import array, transpose, concatenate
 
+from .row_parser import RowParser
 
-def slice_by(it, n):
-    return zip(*[it[i::n] for i in range(n)])
+
+def slice_by(it: List[str], n: int) -> List[Tuple[Any, ...]]:
+    return [j for j in zip(*[it[i::n] for i in range(n)])]
 
 
 class FileParser:
-    def __init__(self, RowParser, filename, shallow=False):
+    row: RowParser
+    names: List[str]
+    filename: str
+    _data: Optional[array]
+
+    def __init__(self, RowParser: Callable, filename: str, shallow: bool=False) -> None:
         self.row = RowParser(filename)
         self.names = list(self.row.names)
         self.filename = filename
@@ -18,12 +26,12 @@ class FileParser:
         if not shallow:
             self._parse()
 
-    def _parse(self):
+    def _parse(self) -> None:
         with open(self.filename, 'r') as datafile:
             lines = datafile.readlines()[self.row.drop_lines:]
             self._data = array([self.row.parse(*line) for line in slice_by(lines, self.row.lines)])
 
-    def get(self, *params, transposed=False):
+    def get(self, *params: Any, transposed: bool=False) -> array:
         idxs = [self.names.index(param) for param in params]
         if len(idxs) == 1:
             idx = idxs[0]
@@ -34,14 +42,16 @@ class FileParser:
         return data if not transposed else transpose(data)
 
     @property
-    def data(self):
-        return self._data
+    def data(self) -> array:
+        return array([]) if self._data is None else self._data
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<{}[{:.2f} - {:.2f}]>'.format(self.__class__.__name__, self.data[0, 0] / 1000., self.data[-1, 0] / 1000.)
 
 
 class FileParserWindow(FileParser):
-        def __init__(self, origin: FileParser, sequence_filter: array):
+        def __init__(self, origin: FileParser, sequence_filter: array) -> None:
             super().__init__(origin.RowParser, origin.filename, shallow=True)
-            self._data = origin._data[sequence_filter, :]
+            if origin._data is not None:
+                self._data = origin.data[sequence_filter, :]
+            self.cache_hash = origin.filename + ','.join(map(str, sequence_filter))

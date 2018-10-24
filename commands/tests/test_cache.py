@@ -2,7 +2,7 @@ from commands.utils.local_cache import LocalCache
 
 
 class HashableObject:
-    def __init__(self, valuable: str, invaluable: str):
+    def __init__(self, valuable: str, invaluable: str) -> None:
         self.valuable = valuable
         self.invaluable = invaluable
 
@@ -11,7 +11,7 @@ class HashableObject:
         return self.valuable
 
 
-def test_function_will_be_called_once():
+def test_function_will_be_called_once() -> None:
     scope = dict(calls_counter=0)
     return_value = 'string'
 
@@ -25,7 +25,7 @@ def test_function_will_be_called_once():
     assert scope['calls_counter'] == 1
 
 
-def test_cache_hash_property():
+def test_cache_hash_property() -> None:
     scope = dict(calls_count=0)
 
     @LocalCache('test_cache_hash_property')

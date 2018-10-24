@@ -5,7 +5,7 @@ from commands.settings.de2 import DE2_SOURCE_WATS
 from commands.utils.resolve_data_source import resolve_data_source
 
 
-def test_simple_wats():
+def test_simple_wats() -> None:
     path, _, _, _ = resolve_data_source(DE2_SOURCE_WATS)
     parser = FileParser(SourceWATSRow, join(path, '1982229_de2_wats_2s_v01.asc'))
 

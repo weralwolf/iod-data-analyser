@@ -5,7 +5,7 @@ from commands.artifacts.sampled_day import make_continuity_filter
 from commands.utils.resolve_data_source import resolve_data_source
 
 
-def test_make_continuity_filter_empty():
+def test_make_continuity_filter_empty() -> None:
     path, _, _, _ = resolve_data_source(DE2_SOURCE_NACS)
     data = parsed_data(DE2_SOURCE_NACS, join(path, '1981295T001140_0_DE2_NACS_1S_V01.ASC'))
     is_continuous = make_continuity_filter(data, [])
@@ -17,7 +17,7 @@ def test_make_continuity_filter_empty():
     assert is_continuous(8 - 3) is True
 
 
-def test_make_continuity_filter_o_dens():
+def test_make_continuity_filter_o_dens() -> None:
     path, _, _, _ = resolve_data_source(DE2_SOURCE_NACS)
     data = parsed_data(DE2_SOURCE_NACS, join(path, '1981295T001140_0_DE2_NACS_1S_V01.ASC'))
     is_continuous = make_continuity_filter(data, ['o_dens'])
@@ -33,7 +33,7 @@ def test_make_continuity_filter_o_dens():
     assert is_continuous(1704 - 3) is False
 
 
-def test_make_continuity_filter_o_dens_he_dens():
+def test_make_continuity_filter_o_dens_he_dens() -> None:
     path, _, _, _ = resolve_data_source(DE2_SOURCE_NACS)
     data = parsed_data(DE2_SOURCE_NACS, join(path, '1981295T001140_0_DE2_NACS_1S_V01.ASC'))
     is_continuous = make_continuity_filter(data, ['o_dens', 'he_dens'])
@@ -46,7 +46,7 @@ def test_make_continuity_filter_o_dens_he_dens():
     assert is_continuous(1704 - 3) is False
 
 
-def test_make_continuity_filter_o_dens_he_dens_ar_dens_1():
+def test_make_continuity_filter_o_dens_he_dens_ar_dens_1() -> None:
     path, _, _, _ = resolve_data_source(DE2_SOURCE_NACS)
     data = parsed_data(DE2_SOURCE_NACS, join(path, '1981295T001140_0_DE2_NACS_1S_V01.ASC'))
     is_continuous = make_continuity_filter(data, ['o_dens', 'he_dens', 'ar_dens'])
@@ -59,7 +59,7 @@ def test_make_continuity_filter_o_dens_he_dens_ar_dens_1():
     assert is_continuous(1704 - 3) is False
 
 
-def test_make_continuity_filter_o_dens_he_dens_ar_dens_2():
+def test_make_continuity_filter_o_dens_he_dens_ar_dens_2() -> None:
     path, _, _, _ = resolve_data_source(DE2_SOURCE_NACS)
     data = parsed_data(DE2_SOURCE_NACS, join(path, '1981295T001140_0_DE2_NACS_1S_V01.ASC'))
     is_continuous = make_continuity_filter(data, ['o_dens', 'he_dens', 'ar_dens'])

@@ -1,28 +1,36 @@
+from typing import Any, Dict, List, Optional
+from logging import getLogger
 from os.path import basename
 from collections import OrderedDict
+from commands.utils.cache_property import cached_property
 
-from ionospheredata.utils import cached_property
+from numpy import array
+
+logger = getLogger('django')
 
 
 class NoFileSpecifiedError(Exception):
-    def __init__(self):
+    def __init__(self) -> None:
         super(NoFileSpecifiedError, self).__init__('Can not parse file, filename is not specified')
 
 
 class RowParser(object):
-    seed = [OrderedDict([])]
-    drop_lines = 0
+    seed: List[OrderedDict] = [OrderedDict([])]
+    drop_lines: int = 0
+    filename: OrderedDict
+    meta: Dict
 
-    def __init__(self, filename=None):
+    def __init__(self, filename: Optional[str] = None) -> None:
+        logger.info('ROW PARSER FOR: {}'.format(filename))
         self.meta = dict(zip(
             self.filename.keys(),
             self._parse([self.filename], basename(filename)))
         ) if hasattr(self, 'filename') and filename is not None else dict()
 
-    def parse(self, *lines):
+    def parse(self, *lines: str) -> array:
         return self._parse(self.seed, *lines)
 
-    def _parse(self, seed, *lines):
+    def _parse(self, seed: List[OrderedDict], *lines: str) -> array:
         data = []
         delayed = {}
         for idx in range(len(seed)):
@@ -40,12 +48,12 @@ class RowParser(object):
                 data[idx] = computer(**computed, **self.meta)
         return data
 
-    def stringify(self, row):
-        return self.format_line.format(*row)
+    def stringify(self, row: List[Any]) -> str:
+        return str(self.format_line.format(*row))
 
     @cached_property(ttl=0)
-    def format_line(self):
-        lines = []
+    def format_line(self) -> str:
+        lines: List[str] = []
         for idx in range(len(self.seed)):
             formats = []
             for computer, type_cast in self.seed[idx].values():
@@ -58,9 +66,9 @@ class RowParser(object):
         return '\n'.join(lines) + '\n'
 
     @cached_property(ttl=0)
-    def names(self):
-        return sum([list(line.keys()) for line in self.seed], [])
+    def names(self) -> List[str]:
+        return [n for n in sum([list(line.keys()) for line in self.seed], [])]
 
     @property
-    def lines(self):
+    def lines(self) -> int:
         return len(self.seed)

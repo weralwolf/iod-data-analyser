@@ -1,3 +1,4 @@
+from typing import Dict, List
 from hashlib import sha256
 from commands.utils.types import FileList
 from commands.utils.local_cache import LocalCache
@@ -9,7 +10,7 @@ from .monotone_files import monotone_files
 def deduplicated_files(source_marker: str) -> FileList:
     monotone_files_list = monotone_files(source_marker)
 
-    hashes = {}
+    hashes: Dict[str, List[str]] = {}
     for filename in monotone_files_list:
         fhash = sha256(open(filename, 'r').read().encode('utf-8').strip()).hexdigest()
         if fhash not in hashes:

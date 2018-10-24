@@ -1,5 +1,6 @@
 import re
 from os import getenv
+from typing import Any, Dict
 from fnmatch import fnmatch
 from os.path import join, basename
 from commands.parsers import de2
@@ -11,7 +12,7 @@ DE2_SOURCE_NACS = 'DE2_SOURCE_NACS'
 DE2_SOURCE_WATS = 'DE2_SOURCE_WATS'
 DE2_PARSED_NACS = 'DE2_PARSED_NACS'
 
-sources_map = {
+sources_map: Dict[str, Any] = {
     DE2_SOURCE_NACS: dict(
         path=getenv('DE2SOURCE_NACS_DIR', None),
         parser=de2.SourceNACSRow,

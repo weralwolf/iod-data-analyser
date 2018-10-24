@@ -5,7 +5,7 @@ from commands.filters.monotone import monotone
 from commands.artifacts.base_filtering.not_monotone_files import not_monotone_files
 
 
-def test_not_monotone_files():
+def test_not_monotone_files() -> None:
     files_list = not_monotone_files(DE2_SOURCE_NACS)
 
     assert len(files_list) == len(NACS_TEST_FILES_NOT_MONOTONE)

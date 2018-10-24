@@ -98,3 +98,4 @@ _artifacts/*
 .local/*
 .pytest_cache/*
 README.rst.stk/*
+.mypy_cache/*

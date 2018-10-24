@@ -1,7 +1,8 @@
+from typing import Any, Tuple, Callable
 from commands.settings.de2 import sources_map as de2_source_map
 
 
-def resolve_data_source(source: str):
+def resolve_data_source(source: str) -> Tuple[str, Any, Callable, Callable]:
     if source not in de2_source_map:
         raise ValueError('No data source known with name `{}`'.format(source))
     return (

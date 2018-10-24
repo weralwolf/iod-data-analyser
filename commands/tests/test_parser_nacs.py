@@ -5,7 +5,7 @@ from commands.settings.de2 import DE2_SOURCE_NACS
 from commands.utils.resolve_data_source import resolve_data_source
 
 
-def test_simple_nacs_parse():
+def test_simple_nacs_parse() -> None:
     path, _, _, _ = resolve_data_source(DE2_SOURCE_NACS)
     parser = FileParser(SourceNACSRow, join(path, '1981295T072140_0_DE2_NACS_1S_V01.ASC'))
     utsod = parser.get('ut', 'o_dens')

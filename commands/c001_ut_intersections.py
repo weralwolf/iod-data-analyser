@@ -1,6 +1,7 @@
 import hashlib
 from os.path import join, basename
-from commands.parsers import FileParser, SourceNACSRow, SourceWATSRow
+from commands.parsers import FileParser
+from commands.parsers.de2 import SourceNACSRow, SourceWATSRow
 from commands.utils.logger import logger
 
 from ionospheredata.utils import local_preload, list_datafiles

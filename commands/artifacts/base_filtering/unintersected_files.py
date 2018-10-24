@@ -1,3 +1,4 @@
+from typing import Any, List
 from os.path import basename
 from commands.utils.types import FileList
 from commands.utils.local_cache import LocalCache
@@ -12,7 +13,7 @@ def unintersected_files(source_marker: str) -> FileList:
     deduplicated_files_list = deduplicated_files(source_marker)
     path, parser_class, selector, features_extractor = resolve_data_source(source_marker)
 
-    unitersected = []
+    unitersected: List[Any] = []
     previous_key = None
     for filename in sorted(deduplicated_files_list):
         data = parsed_data(source_marker, filename)

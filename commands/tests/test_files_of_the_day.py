@@ -7,7 +7,7 @@ from commands.artifacts.files_of_the_day import files_of_the_day
 logger = logging.getLogger(__file__)
 
 
-def test_files_of_the_day():
+def test_files_of_the_day() -> None:
     days = [
         (1981, 295),
         (1981, 296),

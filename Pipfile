@@ -11,6 +11,7 @@ seaborn = "*"
 scipy = "*"
 pandas = "*"
 pychalk = "*"
+mypy = "*"
 
 [dev-packages]
 "flake8" = "*"
@@ -19,6 +20,7 @@ isort = "*"
 ipython = "*"
 colored = "*"
 pytest = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.6.5"

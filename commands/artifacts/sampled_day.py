@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Any, List, Tuple, Callable, Optional
 from commands.utils.logger import logger
 from commands.utils.local_cache import LocalCache
 from commands.parsers.file_parser import FileParser, FileParserWindow
@@ -35,16 +35,16 @@ def make_deltas(ut: array) -> array:
     return round(concatenate([ut, empty_bin]) - concatenate([empty_bin, ut]))[1:-1].astype(int)
 
 
-def make_continuity_filter(data: FileParser, continuity_params: List[str], zero_cond=True):
+def make_continuity_filter(data: FileParser, continuity_params: List[str], zero_cond: bool=True) -> Callable:
     if len(continuity_params) == 0:
         return lambda idx: True
 
-    def is_present(value):
+    def is_present(value: Any) -> bool:
         return value is not None and not isnan(value) and (not zero_cond or value != 0)
 
     continuity_data = data.get(*continuity_params)
 
-    def check_value(idx):
+    def check_value(idx: int) -> bool:
         return all([is_present(continuity_data[idx, param_idx]) for param_idx in range(len(continuity_params))])
     return check_value
 
@@ -94,13 +94,13 @@ def sample(data: FileParser, sampling: int, continuity_params: List[str]) -> Lis
 
 
 @LocalCache()
-def sampled_day(source_marker: str, year: int, day: int, sampling: int, continuity_params: List[str]=None):
+def sampled_day(source_marker: str, year: int, day: int, sampling: int, continuity_params: Optional[List[str]]=None) -> List[FileParserWindow]:
     if continuity_params is None:
         continuity_params = []
     files_list = files_of_the_day(source_marker, year, day)
-    sampled_chunks = []
+    sampled_chunks: List[FileParserWindow] = []
     for file in sorted(files_list):
         logger.error(file)
         data = parsed_data(source_marker, file)
-        sampled_chunks += sample(data, sampling, continuity_params)
+        sampled_chunks = [*sampled_chunks, *sample(data, sampling, continuity_params)]
     return sampled_chunks

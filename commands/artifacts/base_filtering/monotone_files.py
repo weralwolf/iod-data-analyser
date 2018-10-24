@@ -13,4 +13,4 @@ def monotone_files(source_marker: str) -> FileList:
 
     # Here do fixes on `not_monotone_files_list` files if needed
 
-    return already_monotone
+    return list(already_monotone)

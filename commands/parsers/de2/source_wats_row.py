@@ -1,9 +1,10 @@
+from typing import List
 from collections import OrderedDict
 from commands.parsers.row_parser import RowParser
 
 
 class SourceWATSRow(RowParser):
-    seed = [
+    seed: List[OrderedDict] = [
         OrderedDict([
             ('year', ((1, 3), int)),
             ('day', ((3, 6), int)),
@@ -79,4 +80,4 @@ class SourceWATSRow(RowParser):
             # 25 - SZA    (F7.1)  [degree]  Solar Zenith Angle
         ])
     ]
-    drop_lines = 0
+    drop_lines: int = 0

@@ -19,4 +19,13 @@ services:
       - "./commands/tests/test_data:/data"
     environment:
       ENV: Local
-    command: pytest -vvv
+    command: pytest -vvv commands/
+
+  type-check:
+    build: .
+    restart: always
+    volumes:
+      - ".:/usr/app"
+    environment:
+      ENV: Local
+    command: python -m mypy ./commands/artifacts ./commands/filters ./commands/parsers ./commands/settings ./commands/tests ./commands/transformers ./commands/utils  --no-incremental --strict --check-untyped-defs --disallow-untyped-calls --disallow-untyped-defs --disallow-incomplete-defs --warn-incomplete-stub --python-version=3.6 --follow-imports=skip --ignore-missing-imports --allow-untyped-decorators

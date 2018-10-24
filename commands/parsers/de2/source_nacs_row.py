@@ -1,9 +1,10 @@
+from typing import List
 from collections import OrderedDict
 from commands.parsers.row_parser import RowParser
 
 
 class SourceNACSRow(RowParser):
-    seed = [
+    seed: List[OrderedDict] = [
         OrderedDict([
             ('ut', ((0, 9), int)),
             ('o_dens', ((9, 22), float)),
@@ -27,8 +28,8 @@ class SourceNACSRow(RowParser):
             ('sza', ((167, 174), float)),
         ])
     ]
-    filename = OrderedDict([
+    filename: OrderedDict = OrderedDict([
         ('year', ((0, 4), int)),
         ('day_of_year', ((4, 7), int)),
     ])
-    drop_lines = 2
+    drop_lines: int = 2
