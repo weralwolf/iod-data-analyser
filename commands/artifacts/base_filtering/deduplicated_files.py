@@ -8,6 +8,11 @@ from .monotone_files import monotone_files
 
 @LocalCache()
 def deduplicated_files(source_marker: str) -> FileList:
+    """
+    List all monotone files without data duplicates, which are files which differe only by filenames.
+    :param source_marker: identificator of a data source.
+    :return list of unique files.
+    """
     monotone_files_list = monotone_files(source_marker)
 
     hashes: Dict[str, List[str]] = {}

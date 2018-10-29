@@ -3,6 +3,12 @@ To bootstrap the project perform following commands:
 
 For more details on installation PROJ see [http://proj4.org/install.html](http://proj4.org/install.html)  pipenv install
 
+# Ipython autoreload
+```
+%load_ext autoreload
+%autoreload 2
+```
+
 # Method
 [https://github.com/Skorokhodik/IonosphereData.git](https://github.com/Skorokhodik/IonosphereData.git)
 

@@ -1,0 +1,5 @@
+-. Make a test case for `files_of_the_day` where day must be padded with zeros;
+-. Reload function's cache if function body is changed. Check for hash of 'func.__code__.co_code';
+-. Cleanup cache if wasn't accessed;
+-. Create makefile to simplify and gather docker-compose commands. Use it instead of manage.py;
+-. Default autoreload for ipython console. Also take a look here: https://ipython.readthedocs.io/en/stable/config/intro.html

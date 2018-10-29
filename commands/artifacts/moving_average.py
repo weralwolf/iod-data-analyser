@@ -34,4 +34,11 @@ def moving_average_sequence(x: array, window_len: int=11, split_by_nans: bool=Fa
 
 @LocalCache()
 def moving_average(data_chunk: FileParserWindow, *params_list: str, window_size: int=11) -> array:
+    """
+    Performs a moving average with flixible window_size on the ends of segment.
+    :param data_chunk: a FileParser like object representing required data.
+    :param params_list: a list of parameters over which averaging must be done.
+    :param window_size: size of a maximum averaging window (it will automatically shrinks on the ends of data segment).
+    :return array with averaged values of requested params.
+    """
     return array([moving_average_sequence(x, window_size, split_by_nans=False) for x in data_chunk.get(*params_list, transposed=True)])

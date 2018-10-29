@@ -1,13 +1,12 @@
 from typing import Tuple
+from commands.utils.logger import logger  # noqa: F401
 from commands.settings.analysis import ZEROFILL_LENGTH, GW_MAX_WAVELENGTH, GW_MIN_WAVELENGTH, SATELLITE_VELOCITY
 from commands.utils.local_cache import LocalCache
-from commands.utils.logger import logger
 from commands.parsers.file_parser import FileParserWindow
 from commands.artifacts.moving_average import moving_average
 
-from numpy import copy, array, zeros, average
+from numpy import copy, array, zeros
 from numpy.fft import rfft, irfft
-from logging import getLogger
 
 
 def zerofilled_bounds(original_length: int) -> Tuple[int, int]:
@@ -16,48 +15,48 @@ def zerofilled_bounds(original_length: int) -> Tuple[int, int]:
 
 
 def zerofilled_signal(original: array) -> array:
-    zerofilled = zeros(ZEROFILL_LENGTH)
-    original_length = len(original)
+    zerofilled = zeros((original.shape[0], ZEROFILL_LENGTH))
+    original_length = original.shape[1]
 
     bs, be = zerofilled_bounds(original_length)
 
-    zerofilled[bs:be] = original
+    zerofilled[:, bs:be] = original
     return zerofilled
 
 
 def original_signal(signal: array, original_length: int) -> array:
     bs, be = zerofilled_bounds(original_length)
-    return signal[bs:be]
+    return signal[:, bs:be]
 
 
 def ideal_signal_filter(wave: array, sampling: int) -> Tuple[array, array, array]:
-    original_length = len(wave)
+    original_length = wave.shape[1]
     signal = zerofilled_signal(wave)
     spectra = rfft(signal)
 
     min_threshold_index = int(round(ZEROFILL_LENGTH * sampling * SATELLITE_VELOCITY / GW_MIN_WAVELENGTH))
     max_threshold_index = int(round(ZEROFILL_LENGTH * sampling * SATELLITE_VELOCITY / GW_MAX_WAVELENGTH))
 
-    new_spectra = copy(spectra)
-    new_spectra[:max_threshold_index] = 0
-    new_spectra[min_threshold_index:] = 0
+    trimmed_spectra = copy(spectra)
+    trimmed_spectra[:, :max_threshold_index] = 0
+    trimmed_spectra[:, min_threshold_index:] = 0
+    trimmed_signal = original_signal(irfft(trimmed_spectra), original_length)
 
-    trend_spectra = copy(spectra)
-    trend_spectra[max_threshold_index:] = 0
+    lf_area_spectra = copy(spectra)
+    lf_area_spectra[:, max_threshold_index:] = 0
+    lf_signal = original_signal(irfft(lf_area_spectra), original_length)
 
-    noise_spectra = copy(spectra)
-    noise_spectra[:min_threshold_index] = 0
+    hf_area_spectra = copy(spectra)
+    hf_area_spectra[:, :min_threshold_index] = 0
+    hf_signal = original_signal(irfft(hf_area_spectra), original_length)
 
-    new_signal = original_signal(irfft(new_spectra), original_length)
-    trend_filtered = original_signal(irfft(trend_spectra), original_length)
-    noise = original_signal(irfft(noise_spectra), original_length)
-
-    return new_signal, trend_filtered, noise
+    return trimmed_signal, lf_signal, hf_signal
 
 
 @LocalCache()
-def wave_decomposition(data_chunk: FileParserWindow, *params_list: str, sampling: int=1) -> array:  # Tuple[array, array, array]:
+def wave_decomposition(data_chunk: FileParserWindow, *params_list: str, sampling: int=1) -> Tuple[array, array, array]:
     value = data_chunk.get(*params_list, transposed=True)
-    moving_average_trend = moving_average(data_chunk, *params_list)
-    waves = value - moving_average_trend
-    return array([(wave, trend + moving_average_trend, noise) for wave, trend, noise in [ideal_signal_filter(wave, sampling) for wave in waves]])
+    rough_trend = moving_average(data_chunk, *params_list, window_size=701)
+    wave = value - rough_trend
+    gw, lf_trend, noise = ideal_signal_filter(wave, sampling)
+    return gw, rough_trend + lf_trend, noise
