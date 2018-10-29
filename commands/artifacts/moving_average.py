@@ -1,4 +1,3 @@
-from typing import List
 from commands.utils.local_cache import LocalCache
 from commands.parsers.file_parser import FileParserWindow
 
@@ -34,5 +33,5 @@ def moving_average_sequence(x: array, window_len: int=11, split_by_nans: bool=Fa
 
 
 @LocalCache()
-def moving_average(data_chunk: FileParserWindow, *params_list: List[str], window_size: int=11) -> array:
+def moving_average(data_chunk: FileParserWindow, *params_list: str, window_size: int=11) -> array:
     return array([moving_average_sequence(x, window_size, split_by_nans=False) for x in data_chunk.get(*params_list, transposed=True)])
