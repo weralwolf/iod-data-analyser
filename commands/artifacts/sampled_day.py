@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple, Callable, Optional
+from typing import Any, List, Tuple, Callable
 from commands.utils.logger import logger
 from commands.utils.local_cache import LocalCache
 from commands.parsers.file_parser import FileParser, FileParserWindow
@@ -35,7 +35,7 @@ def make_deltas(ut: array) -> array:
     return round(concatenate([ut, empty_bin]) - concatenate([empty_bin, ut]))[1:-1].astype(int)
 
 
-def make_continuity_filter(data: FileParser, continuity_params: List[str], zero_cond: bool=True) -> Callable:
+def make_continuity_filter(data: FileParser, continuity_params: Tuple[str, ...], zero_cond: bool=True) -> Callable:
     if len(continuity_params) == 0:
         return lambda idx: True
 
@@ -49,7 +49,7 @@ def make_continuity_filter(data: FileParser, continuity_params: List[str], zero_
     return check_value
 
 
-def sample(data: FileParser, sampling: int, continuity_params: List[str]) -> List[FileParserWindow]:
+def sample(data: FileParser, sampling: int, continuity_params: Tuple[str, ...]) -> List[FileParserWindow]:
     """
     Sample data within fixed sampling supporting continuity of list of parameters.
     """
@@ -94,7 +94,16 @@ def sample(data: FileParser, sampling: int, continuity_params: List[str]) -> Lis
 
 
 @LocalCache()
-def sampled_day(source_marker: str, year: int, day: int, sampling: int, continuity_params: Optional[List[str]]=None) -> List[FileParserWindow]:
+def sampled_day(source_marker: str, year: int, day: int, sampling: int, *continuity_params: str) -> List[FileParserWindow]:
+    """
+    Computes continuous data chunks inside of one day.
+    :param source_marker: identificator of a data source.
+    :param year: integer value representing year.
+    :param day: integer value representing day.
+    :param sampling: a sampling in seconds which is used to count continuity in UT.
+    :param continuity_params: list of params continuity of which must be preserved.
+    :return list of sampled data chunks.
+    """
     if continuity_params is None:
         continuity_params = []
     files_list = files_of_the_day(source_marker, year, day)

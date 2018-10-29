@@ -10,6 +10,11 @@ from .deduplicated_files import deduplicated_files
 
 @LocalCache()
 def unintersected_files(source_marker: str) -> FileList:
+    """
+    List files which does not intersect in UT.
+    :param source_marker: identificator of a data source.
+    :return list of files not intersecting in UT.
+    """
     deduplicated_files_list = deduplicated_files(source_marker)
     path, parser_class, selector, features_extractor = resolve_data_source(source_marker)
 

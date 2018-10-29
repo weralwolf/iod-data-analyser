@@ -1,4 +1,5 @@
 from typing import Any, List, Tuple, Callable, Optional
+from os.path import basename
 from commands.utils.logger import logger  # noqa: F401
 
 from numpy import array, transpose, concatenate
@@ -46,7 +47,12 @@ class FileParser:
         return array([]) if self._data is None else self._data
 
     def __repr__(self) -> str:
-        return '<{}[{:.2f} - {:.2f}]>'.format(self.__class__.__name__, self.data[0, 0] / 1000., self.data[-1, 0] / 1000.)
+        return '<{} of {} [{:.2f} - {:.2f}]>'.format(
+                self.__class__.__name__,
+                basename(self.filename),
+                self.data[0, 0] / 1000.,
+                self.data[-1, 0] / 1000.
+        )
 
 
 class FileParserWindow(FileParser):

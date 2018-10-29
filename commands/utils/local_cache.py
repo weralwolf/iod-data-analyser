@@ -38,9 +38,9 @@ class LocalCache:
             task_hash = self._hash(key, *args, **kwargs)
             exists, result = self._recover_result(task_hash)
             if exists:
-                logger.error('{} - local storage'.format(func.__name__))
+                logger.error('cache: {} / {}'.format(func.__name__, task_hash))
                 return result
-            logger.error('{} - local calculations'.format(func.__name__))
+            logger.error('comp:  {} / {}'.format(func.__name__, task_hash))
             result = func(*args, **kwargs)
             return self._cache_result(task_hash, result)
         return wrapper

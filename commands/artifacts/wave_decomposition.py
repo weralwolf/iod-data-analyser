@@ -1,13 +1,12 @@
 from typing import Tuple
+from commands.utils.logger import logger  # noqaL: F401
 from commands.settings.analysis import ZEROFILL_LENGTH, GW_MAX_WAVELENGTH, GW_MIN_WAVELENGTH, SATELLITE_VELOCITY
 from commands.utils.local_cache import LocalCache
-from commands.utils.logger import logger
 from commands.parsers.file_parser import FileParserWindow
 from commands.artifacts.moving_average import moving_average
 
-from numpy import copy, array, zeros, average
+from numpy import copy, array, zeros
 from numpy.fft import rfft, irfft
-from logging import getLogger
 
 
 def zerofilled_bounds(original_length: int) -> Tuple[int, int]:

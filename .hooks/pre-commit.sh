@@ -20,7 +20,7 @@ pipenv lock -r | sort > requirements.txt
 git add -N requirements.txt
 REQUIREMENTS_DIFF=`git diff -- requirements.txt`
 
-if [ ! -z "${REQUIREMENTS_DIFF// }" ]; then
+if [ ! -z "${REQUIREMENTS_DIFF}" ]; then
   echo "Amend changes of requirements.txt to commit..."
   git add requirements.txt
 fi
