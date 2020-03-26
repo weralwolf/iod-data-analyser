@@ -35,7 +35,7 @@ def make_deltas(ut: array) -> array:
     return round(concatenate([ut, empty_bin]) - concatenate([empty_bin, ut]))[1:-1].astype(int)
 
 
-def make_continuity_filter(data: FileParser, continuity_params: Tuple[str, ...], zero_cond: bool=True) -> Callable:
+def make_continuity_filter(data: FileParser, continuity_params: Tuple[str, ...], zero_cond: bool = True) -> Callable:
     if len(continuity_params) == 0:
         return lambda idx: True
 

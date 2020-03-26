@@ -54,7 +54,7 @@ def ideal_signal_filter(wave: array, sampling: int) -> Tuple[array, array, array
 
 
 @LocalCache()
-def wave_decomposition(data_chunk: FileParserWindow, *params_list: str, sampling: int=1) -> Tuple[array, array, array]:
+def wave_decomposition(data_chunk: FileParserWindow, *params_list: str, sampling: int = 1) -> Tuple[array, array, array]:
     value = data_chunk.get(*params_list, transposed=True)
     rough_trend = moving_average(data_chunk, *params_list, window_size=701)
     wave = value - rough_trend

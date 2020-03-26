@@ -26,7 +26,7 @@ class LocalCache:
     """
     cachefile_extension = 'pydata'
 
-    def __init__(self, key: Optional[str]=None, force_reload: bool=False, cache_dir: str=CACHE_DIR) -> None:
+    def __init__(self, key: Optional[str] = None, force_reload: bool = False, cache_dir: str = CACHE_DIR) -> None:
         self.key = key
         self.force_reload = force_reload
         self.cache_dir = cache_dir
@@ -78,7 +78,7 @@ class LocalCache:
         return repr(value)
 
     @classmethod
-    def clear_cache(cls, cache_dir: str=CACHE_DIR) -> List[str]:
+    def clear_cache(cls, cache_dir: str = CACHE_DIR) -> List[str]:
         removed_hashes = []
         for filename in listdir(cache_dir):
             if fnmatch(filename, '*.' + cls.cachefile_extension):

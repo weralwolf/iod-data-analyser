@@ -6,7 +6,7 @@ from commands.artifacts.base_filtering.filtered_files import filtered_files
 
 
 @LocalCache()
-def list_days(source_marker: str, filtered: bool=False) -> List[Tuple[int, int]]:
+def list_days(source_marker: str, filtered: bool = False) -> List[Tuple[int, int]]:
     """
     List all days available for a data source.
     :param source_marker: identificator of a data source.

@@ -17,7 +17,7 @@ class FileParser:
     filename: str
     _data: Optional[array]
 
-    def __init__(self, RowParser: Callable, filename: str, shallow: bool=False) -> None:
+    def __init__(self, RowParser: Callable, filename: str, shallow: bool = False) -> None:
         self.row = RowParser(filename)
         self.names = list(self.row.names)
         self.filename = filename
@@ -32,7 +32,7 @@ class FileParser:
             lines = datafile.readlines()[self.row.drop_lines:]
             self._data = array([self.row.parse(*line) for line in slice_by(lines, self.row.lines)])
 
-    def get(self, *params: Any, transposed: bool=False) -> array:
+    def get(self, *params: Any, transposed: bool = False) -> array:
         idxs = [self.names.index(param) for param in params]
         if len(idxs) == 1:
             idx = idxs[0]
@@ -56,8 +56,8 @@ class FileParser:
 
 
 class FileParserWindow(FileParser):
-        def __init__(self, origin: FileParser, sequence_filter: array) -> None:
-            super().__init__(origin.RowParser, origin.filename, shallow=True)
-            if origin._data is not None:
-                self._data = origin.data[sequence_filter, :]
-            self.cache_hash = origin.filename + ','.join(map(str, sequence_filter))
+    def __init__(self, origin: FileParser, sequence_filter: array) -> None:
+        super().__init__(origin.RowParser, origin.filename, shallow=True)
+        if origin._data is not None:
+            self._data = origin.data[sequence_filter, :]
+        self.cache_hash = origin.filename + ','.join(map(str, sequence_filter))

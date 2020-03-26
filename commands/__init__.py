@@ -13,7 +13,7 @@ def list_commands():
     for fname in listdir(CURRENT_DIR):
         own_name = basename(fname)
         if fnmatch(fname, '*.py') and own_name != 'chalk.py':
-            pattern_match = match('^c(\d*)?_?(.*)\.py$', own_name)
+            pattern_match = match(r'^c(\d*)?_?(.*)\.py$', own_name)
             if pattern_match is None:
                 continue
             unparsed_index, name = pattern_match.groups()

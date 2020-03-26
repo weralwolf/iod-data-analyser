@@ -4,7 +4,7 @@ from commands.parsers.file_parser import FileParserWindow
 from numpy import nan, array, isnan, split, where, concatenate
 
 
-def moving_average_sequence(x: array, window_len: int=11, split_by_nans: bool=False) -> array:
+def moving_average_sequence(x: array, window_len: int = 11, split_by_nans: bool = False) -> array:
     if len(x) == 0:
         return array([])
 
@@ -33,7 +33,7 @@ def moving_average_sequence(x: array, window_len: int=11, split_by_nans: bool=Fa
 
 
 @LocalCache()
-def moving_average(data_chunk: FileParserWindow, *params_list: str, window_size: int=11) -> array:
+def moving_average(data_chunk: FileParserWindow, *params_list: str, window_size: int = 11) -> array:
     """
     Performs a moving average with flixible window_size on the ends of segment.
     :param data_chunk: a FileParser like object representing required data.

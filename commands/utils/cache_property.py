@@ -37,10 +37,10 @@ class cached_property(object):
         del instance._cache[<property name>]
 
     """
-    def __init__(self, ttl: int=300) -> None:
+    def __init__(self, ttl: int = 300) -> None:
         self.ttl = ttl
 
-    def __call__(self, fget: Callable, doc: Optional[str]=None) -> Any:
+    def __call__(self, fget: Callable, doc: Optional[str] = None) -> Any:
         self.fget = fget
         self.__doc__ = doc or fget.__doc__
         self.__name__ = fget.__name__
